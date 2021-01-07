@@ -10,13 +10,17 @@ export const Home = (): JSX.Element => {
   const pdfRenderToCanvas = useCallback((pdf: pdfjsLib.PDFDocumentProxy) => {
     pdf.getPage(1).then((page) => {
       if (!canvasRef.current) return 
+      const viewport = page.getViewport({ scale: 1.5 })
+      canvasRef.current.width = viewport.width
+      canvasRef.current.height = viewport.height
       const canvasContext = canvasRef.current.getContext('2d')
+      
       if (!canvasContext) return
       const renderTask = page.render({
         canvasContext,
-        viewport: page.getViewport({ scale: 1.5 })
+        viewport
       })
-      renderTask.promise.then(function () {
+      renderTask.promise.then(() => {
         console.log('Page rendered');
       });
     })

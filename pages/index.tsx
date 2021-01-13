@@ -1,24 +1,12 @@
 import Head from 'next/head'
 import { useState } from 'react'
+import { jsPDF } from 'jspdf'
 import { PdfViewer } from '../components/PdfViewer'
-import { atob } from '../utils/atob'
 
-const samplePdfData = atob(
-  'JVBERi0xLjcKCjEgMCBvYmogICUgZW50cnkgcG9pbnQKPDwKICAvVHlwZSAvQ2F0YWxvZwog' +
-    'IC9QYWdlcyAyIDAgUgo+PgplbmRvYmoKCjIgMCBvYmoKPDwKICAvVHlwZSAvUGFnZXMKICAv' +
-    'TWVkaWFCb3ggWyAwIDAgMjAwIDIwMCBdCiAgL0NvdW50IDEKICAvS2lkcyBbIDMgMCBSIF0K' +
-    'Pj4KZW5kb2JqCgozIDAgb2JqCjw8CiAgL1R5cGUgL1BhZ2UKICAvUGFyZW50IDIgMCBSCiAg' +
-    'L1Jlc291cmNlcyA8PAogICAgL0ZvbnQgPDwKICAgICAgL0YxIDQgMCBSIAogICAgPj4KICA+' +
-    'PgogIC9Db250ZW50cyA1IDAgUgo+PgplbmRvYmoKCjQgMCBvYmoKPDwKICAvVHlwZSAvRm9u' +
-    'dAogIC9TdWJ0eXBlIC9UeXBlMQogIC9CYXNlRm9udCAvVGltZXMtUm9tYW4KPj4KZW5kb2Jq' +
-    'Cgo1IDAgb2JqICAlIHBhZ2UgY29udGVudAo8PAogIC9MZW5ndGggNDQKPj4Kc3RyZWFtCkJU' +
-    'CjcwIDUwIFRECi9GMSAxMiBUZgooSGVsbG8sIHdvcmxkISkgVGoKRVQKZW5kc3RyZWFtCmVu' +
-    'ZG9iagoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4g' +
-    'CjAwMDAwMDAwNzkgMDAwMDAgbiAKMDAwMDAwMDE3MyAwMDAwMCBuIAowMDAwMDAwMzAxIDAw' +
-    'MDAwIG4gCjAwMDAwMDAzODAgMDAwMDAgbiAKdHJhaWxlcgo8PAogIC9TaXplIDYKICAvUm9v' +
-    'dCAxIDAgUgo+PgpzdGFydHhyZWYKNDkyCiUlRU9G'
-)
-// const samplePdfUrl = 'http://localhost:3000/sample.pdf'
+// TODO: Fix for render "Hello world!"
+const doc = new jsPDF()
+doc.html('<h1>hello world!</h1>')
+const samplePdfData = doc.output()
 
 export const Home = (): JSX.Element => {
   const [data] = useState<string>(samplePdfData)
@@ -32,6 +20,8 @@ export const Home = (): JSX.Element => {
       <div className="container">
         <PdfViewer data={data} />
       </div>
+      <button onClick={() => console.log(samplePdfData)}>console.</button>
+      <button onClick={() => doc.save('a.pdf')}>Download pdf!</button>
     </>
   )
 }

@@ -26,6 +26,7 @@
     ]
   },
   "dependencies": {
+    "jspdf": "2.2.0",
     "next": "10.0.4",
     "pdfjs-dist": "2.5.207",
     "react": "17.0.1",

@@ -93,9 +93,10 @@ export const usePdfViewer = ({
   ]
 }
 export const PdfViewer = (props: Props): JSX.Element => {
-  const [viewerRef, { isLoading }] = usePdfViewer(props)
+  const [viewerRef, { isLoading, load }] = usePdfViewer(props)
   return (
     <>
+      <button onClick={load}>Reload!</button>
       {isLoading && <div>Loading...</div>}
       <PdfRenderArea ref={viewerRef} />
     </>

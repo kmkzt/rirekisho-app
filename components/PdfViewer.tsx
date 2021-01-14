@@ -1,4 +1,5 @@
 import {
+  FC,
   forwardRef,
   RefObject,
   useCallback,
@@ -9,6 +10,7 @@ import {
 import * as pdfjsLib from 'pdfjs-dist'
 import 'pdfjs-dist/web/pdf_viewer.css'
 
+// TODO: optimize import timing.
 pdfjsLib.GlobalWorkerOptions.workerSrc = require('pdfjs-dist/build/pdf.worker.entry')
 
 interface Props {
@@ -64,18 +66,34 @@ export const usePdfViewer = ({
     })
   }, [])
 
+  const loadPdfUrl = useCallback(
+    (url) => {
+      const loadingTask = pdfjsLib.getDocument(url)
+      loadingTask.promise.then((pdf) => {
+        renderPdfViewer(pdf)
+      })
+    },
+    [data, renderPdfViewer]
+  )
+
+  const loadPdfData = useCallback(
+    (data) => {
+      const loadingTask = pdfjsLib.getDocument({ data })
+      loadingTask.promise.then((pdf) => {
+        renderPdfViewer(pdf)
+      })
+    },
+    [data, renderPdfViewer]
+  )
+
   const load = useCallback(() => {
     if (!data) {
       console.error('data is empty!')
       return
     }
-    const loadingTask = isUrl(data)
-      ? pdfjsLib.getDocument(data)
-      : pdfjsLib.getDocument({ data })
-    loadingTask.promise.then((pdf) => {
-      renderPdfViewer(pdf)
-    })
-  }, [data, renderPdfViewer])
+    if (isUrl(data)) loadPdfUrl(data)
+    else loadPdfData(data)
+  }, [data, loadPdfData, loadPdfUrl])
 
   useEffect(() => {
     if (ref.current && isLoading) {
@@ -92,7 +110,16 @@ export const usePdfViewer = ({
     },
   ]
 }
-export const PdfViewer = (props: Props): JSX.Element => {
+
+export const PdfRenderArea = forwardRef<HTMLDivElement>((props, ref) => {
+  return (
+    <div ref={ref} tabIndex={0}>
+      <div id="viewer" className="pdfViewer" />
+    </div>
+  )
+})
+
+export const PdfViewer: FC<Props> = (props) => {
   const [viewerRef, { isLoading, load }] = usePdfViewer(props)
   return (
     <>
@@ -102,10 +129,3 @@ export const PdfViewer = (props: Props): JSX.Element => {
     </>
   )
 }
-export const PdfRenderArea = forwardRef<HTMLDivElement>((props, ref) => {
-  return (
-    <div ref={ref} tabIndex={0}>
-      <div id="viewer" className="pdfViewer" />
-    </div>
-  )
-})

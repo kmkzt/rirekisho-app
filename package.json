@@ -26,7 +26,7 @@
     ]
   },
   "dependencies": {
-    "jspdf": "2.2.0",
+    "jspdf": "https://github.com/MrRio/jsPDF/archive/v2.3.0.tar.gz",
     "next": "10.0.4",
     "pdfjs-dist": "2.5.207",
     "react": "17.0.1",
@@ -50,6 +50,7 @@
     "jest-watch-typeahead": "0.5.0",
     "lint-staged": "10.0.10",
     "prettier": "2.0.2",
+    "raw-loader": "4.0.2",
     "typescript": "3.8.3",
     "url-loader": "4.1.1"
   }

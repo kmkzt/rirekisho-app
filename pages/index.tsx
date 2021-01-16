@@ -7,11 +7,20 @@ import { usePreviewIframe } from '../hooks/usePreviewIframe'
 // Refferences: https://github.com/MrRio/jsPDF/pull/3040/files#diff-539eefab6f8ab52ca4b421fe2d8964bdaf77aa47ac8146edb374af84eaaee46d
 const fontFaces: HTMLFontFace[] = [
   {
+    family: 'Mouhitsu',
+    src: [
+      {
+        url: 'http://localhost:3000/MouhitsuBold.ttf',
+        format: 'truetype',
+      },
+    ],
+  },
+  {
     family: 'Roboto',
     weight: 400,
     src: [
       {
-        url: '/Roboto/Roboto-Regular.ttf',
+        url: 'http://localhost:3000/Roboto/Roboto-Regular.ttf',
         format: 'truetype',
       },
     ],
@@ -21,7 +30,7 @@ const fontFaces: HTMLFontFace[] = [
     weight: 700,
     src: [
       {
-        url: '/Roboto/Roboto-Bold.ttf',
+        url: 'http://localhost:3000/Roboto/Roboto-Bold.ttf',
         format: 'truetype',
       },
     ],
@@ -32,7 +41,7 @@ const fontFaces: HTMLFontFace[] = [
     style: 'italic',
     src: [
       {
-        url: '/Roboto/Roboto-BoldItalic.ttf',
+        url: 'http://localhost:3000/Roboto/Roboto-BoldItalic.ttf',
         format: 'truetype',
       },
     ],
@@ -42,7 +51,7 @@ const fontFaces: HTMLFontFace[] = [
     style: 'italic',
     src: [
       {
-        url: '/Roboto/Roboto-Italic.ttf',
+        url: 'http://localhost:3000/Roboto/Roboto-Italic.ttf',
         format: 'truetype',
       },
     ],
@@ -81,7 +90,7 @@ const initHtml = `
       font-family: sans-serif;
     }
     .roboto {
-      font-family: 'Roboto'
+      font-family: 'Roboto';
     }
     
     .generic {
@@ -97,6 +106,10 @@ const initHtml = `
     .italic {
       font-style: italic;
     }
+
+    .mouhitsu {
+      font-family: 'Mouhitsu';
+    }
   </style>
   <p class="default">
   The quick brown fox jumps over the lazy dog (default)
@@ -107,6 +120,7 @@ const initHtml = `
   <p class="sans-serif">
   The quick brown fox jumps over the lazy dog (sans-serif)
   <p>
+  <p class="mouhitsu">なに</p>
   <div class="roboto">
     <p>
     The quick brown fox jumps over the lazy dog (roboto)
@@ -121,6 +135,7 @@ const initHtml = `
     The quick brown fox jumps over the lazy dog (roboto bold italic)
     <p> 
   </div>
+  
 </div>`
 
 export const Home = (): JSX.Element => {

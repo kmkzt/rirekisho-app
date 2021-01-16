@@ -1,46 +1,127 @@
 import Head from 'next/head'
 import { useEffect, useState, useRef, useCallback } from 'react'
-import { jsPDF } from 'jspdf'
+import { HTMLFontFace, jsPDF } from 'jspdf'
 import { PdfViewer } from '../components/PdfViewer'
 import { usePreviewIframe } from '../hooks/usePreviewIframe'
 
-// const loadBinaryResource = (url: string, unicodeCleanUp?: boolean) => {
-//   const req = new XMLHttpRequest();
-//   req.open("GET", url, false);
-//   // XHR binary charset opt by Marcus Granado 2006 [http://mgran.blogspot.com]
-//   req.overrideMimeType("text/plain; charset=x-user-defined");
-//   req.send(null);
-//   if (req.status !== 200) {
-//     throw new Error("Unable to load file");
-//   }
+// Refferences: https://github.com/MrRio/jsPDF/pull/3040/files#diff-539eefab6f8ab52ca4b421fe2d8964bdaf77aa47ac8146edb374af84eaaee46d
+const fontFaces: HTMLFontFace[] = [
+  {
+    family: 'Roboto',
+    weight: 400,
+    src: [
+      {
+        url: '/Roboto/Roboto-Regular.ttf',
+        format: 'truetype',
+      },
+    ],
+  },
+  {
+    family: 'Roboto',
+    weight: 700,
+    src: [
+      {
+        url: '/Roboto/Roboto-Bold.ttf',
+        format: 'truetype',
+      },
+    ],
+  },
+  {
+    family: 'Roboto',
+    weight: 'bold',
+    style: 'italic',
+    src: [
+      {
+        url: '/Roboto/Roboto-BoldItalic.ttf',
+        format: 'truetype',
+      },
+    ],
+  },
+  {
+    family: 'Roboto',
+    style: 'italic',
+    src: [
+      {
+        url: '/Roboto/Roboto-Italic.ttf',
+        format: 'truetype',
+      },
+    ],
+  },
+]
 
-//   const responseText = req.responseText;
-//   if (unicodeCleanUp) {
-//     const StringFromCharCode = String.fromCharCode;
-//     const byteArray = new Array(req.responseText.length);
+const toFontFaceRule = (fontFace: HTMLFontFace) => {
+  const srcs = fontFace.src.map(
+    (src) => `url('${src.url}') format('${src.format}')`
+  )
 
-//     for (let i = 0; i < responseText.length; i += 1) {
-//       byteArray[i] = StringFromCharCode(responseText.charCodeAt(i) & 0xff);
-//     }
-//     return byteArray.join("");
-//   }
+  const cssProps = [
+    `font-family: ${fontFace.family}`,
+    fontFace.stretch && `font-stretch: ${fontFace.stretch}`,
+    fontFace.style && `font-style: ${fontFace.style}`,
+    fontFace.weight && `font-weight: ${fontFace.weight}`,
+    `src: ${srcs.join('\n')}`,
+  ]
 
-//   return req.responseText;
-// };
-
-const initHtml = `<style>
-@font-face {
-  font-family: 'Mouhitsu';
-  font-weight: 400;
-  src: url('http://localhost:3000/MouhitsuBold.ttf') format('truetype');
+  return `
+    @font-face {
+      ${cssProps.filter((a) => a).join(';\n')} 
+    }
+  `
 }
-* {
-  font-family: 'Mouhitsu';
-}
-</style>
-<h1>テスト</h1>
-<p>AAA</p>
-`
+
+const initHtml = `
+<div style="width: 200px; height: 200px;"> 
+  <style>
+    ${fontFaces.map(toFontFaceRule)}
+    body {
+      font-size: 14px;
+    }
+
+    .sans-serif {
+      font-family: sans-serif;
+    }
+    .roboto {
+      font-family: 'Roboto'
+    }
+    
+    .generic {
+      font-family: monospace; 
+    } 
+    .default {
+      font-family: serif;
+    }
+    .bold {
+      font-weight: bold;
+    }
+
+    .italic {
+      font-style: italic;
+    }
+  </style>
+  <p class="default">
+  The quick brown fox jumps over the lazy dog (default)
+  <p>
+  <p class="generic">
+  The quick brown fox jumps over the lazy dog (generic)
+  <p>
+  <p class="sans-serif">
+  The quick brown fox jumps over the lazy dog (sans-serif)
+  <p>
+  <div class="roboto">
+    <p>
+    The quick brown fox jumps over the lazy dog (roboto)
+    <p>
+    <p class="bold">
+    The quick brown fox jumps over the lazy dog (roboto bold)
+    <p>
+    <p class="italic">
+    The quick brown fox jumps over the lazy dog (roboto italic)
+    <p>
+    <p class="bold italic">
+    The quick brown fox jumps over the lazy dog (roboto bold italic)
+    <p> 
+  </div>
+</div>`
 
 export const Home = (): JSX.Element => {
   const [html, setHtml] = useState(initHtml)
@@ -53,18 +134,8 @@ export const Home = (): JSX.Element => {
     // TODO: Fix render japanese.
     // reffernces: https://github.com/MrRio/jsPDF/pull/3040
     await doc.current.html(htmlString, {
+      fontFaces,
       jsPDF: doc.current,
-      fontFaces: [
-        {
-          family: 'Mouhitsu',
-          src: [
-            {
-              url: 'http://localhost:3000/MouhitsuBold.ttf',
-              format: 'truetype',
-            },
-          ],
-        },
-      ],
     })
     // refferences: https://github.com/MrRio/jsPDF/blob/master/test/specs/japanese.spec.js
     // const fontBlob = loadBinaryResource('/MouhitsuBold.ttf')

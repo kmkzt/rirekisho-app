@@ -67,21 +67,17 @@ export const usePdfViewer = ({
   }, [])
 
   const loadPdfUrl = useCallback(
-    (url) => {
+    (url: string) => {
       const loadingTask = pdfjsLib.getDocument(url)
-      loadingTask.promise.then((pdf) => {
-        renderPdfViewer(pdf)
-      })
+      loadingTask.promise.then(renderPdfViewer)
     },
     [renderPdfViewer]
   )
 
   const loadPdfData = useCallback(
-    (data) => {
+    (data: string) => {
       const loadingTask = pdfjsLib.getDocument({ data })
-      loadingTask.promise.then((pdf) => {
-        renderPdfViewer(pdf)
-      })
+      loadingTask.promise.then(renderPdfViewer)
     },
     [renderPdfViewer]
   )
@@ -111,19 +107,17 @@ export const usePdfViewer = ({
   ]
 }
 
-export const PdfRenderArea = forwardRef<HTMLDivElement>((props, ref) => {
-  return (
-    <div ref={ref}>
-      <div id="viewer" className="pdfViewer" />
-    </div>
-  )
-})
+export const PdfRenderArea = forwardRef<HTMLDivElement>((props, ref) => (
+  <div ref={ref}>
+    <div id="viewer" className="pdfViewer" />
+  </div>
+))
 
 export const PdfViewer: FC<Props> = (props) => {
   const [viewerRef, { isLoading, load }] = usePdfViewer(props)
+  useEffect(load, [load])
   return (
     <>
-      <button onClick={load}>Reload!</button>
       {isLoading && <div>Loading...</div>}
       <PdfRenderArea ref={viewerRef} />
     </>

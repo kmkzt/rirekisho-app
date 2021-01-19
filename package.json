@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "type-check": "tsc --pretty --noEmit",
-    "lint": "eslint . --ext ts --ext tsx --ext js",
+    "lint": "eslint . --ext js,jsx,ts,tsx",
     "test": "jest",
     "test-all": "yarn lint && yarn type-check && yarn test"
   },

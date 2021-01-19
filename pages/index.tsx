@@ -1,3 +1,4 @@
+import Form from '@rjsf/core'
 import { HTMLFontFace, jsPDF } from 'jspdf'
 import Head from 'next/head'
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
@@ -14,16 +15,17 @@ import { fontfaces2style } from '../utils/fontfaces2style'
 export const Home = (): JSX.Element => {
   const [html, { handleInput: handleChangeForHtml }] = useInput(exampleHtml)
   const [css, { handleInput: handleChangeForCss }] = useInput(exampleCss)
+  const [fontFaces, setFontFaces] = useState(exampleFontFaces)
   const displayHtml = useMemo(
     () =>
       '<body>' +
       '<style>' +
-      fontfaces2style(exampleFontFaces) +
+      fontfaces2style(fontFaces) +
       css +
       '</style>' +
       html +
       '</body>',
-    [css, html]
+    [css, html, fontFaces]
   )
   const [pdfBlob, setPdfBlob] = useState<string>('')
   const [iframeUrl, updateIframe] = usePreviewIframe(displayHtml)
@@ -39,6 +41,13 @@ export const Home = (): JSX.Element => {
     })
     setPdfBlob(doc.current.output())
   }, [])
+  const handleChangeFontFaces = useCallback(
+    (ev) => {
+      console.log(ev)
+      // setFontFaces(ev.formData)
+    },
+    [setFontFaces]
+  )
   const handleBlurTextArea = useCallback(() => {
     updatePdf(displayHtml)
     updateIframe(displayHtml)
@@ -53,6 +62,11 @@ export const Home = (): JSX.Element => {
     <>
       <Head>
         <title>Create Next App</title>
+        {/* For react-jsonschema-form */}
+        <link
+          rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        ></link>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="container">
@@ -67,6 +81,30 @@ export const Home = (): JSX.Element => {
           onChange={handleChangeForCss}
           onBlur={handleBlurTextArea}
           rows={10}
+        />
+        <Form
+          schema={{
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                family: { type: 'string' },
+                weight: { type: 'string' },
+                src: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      url: { type: 'string' },
+                      format: { type: 'string' },
+                    },
+                  },
+                },
+              },
+            },
+          }}
+          formData={exampleFontFaces}
+          onChange={handleChangeFontFaces}
         />
         <iframe
           title="Preview HTML"

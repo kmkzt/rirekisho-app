@@ -1,9 +1,9 @@
+import { HTMLFontFace, jsPDF } from 'jspdf'
 import Head from 'next/head'
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
-import { HTMLFontFace, jsPDF } from 'jspdf'
 import { PdfViewer } from '../components/PdfViewer'
-import { usePreviewIframe } from '../hooks/usePreviewIframe'
 import { useInput } from '../hooks/useInput'
+import { usePreviewIframe } from '../hooks/usePreviewIframe'
 
 // Refferences: https://github.com/MrRio/jsPDF/pull/3040/files#diff-539eefab6f8ab52ca4b421fe2d8964bdaf77aa47ac8146edb374af84eaaee46d
 const fontFaces: HTMLFontFace[] = [
@@ -147,8 +147,8 @@ export const Home = (): JSX.Element => {
   )
   const [pdfBlob, setPdfBlob] = useState<string>('')
   const [iframeUrl, updateIframe] = usePreviewIframe(displayHtml)
-  // const [isLoading, setLoading] = useState(true)
   const doc = useRef(new jsPDF())
+  // const [isLoading, setLoading] = useState(true)
   const updatePdf = useCallback(async (html: string) => {
     doc.current = new jsPDF()
     // TODO: Fix render japanese.
@@ -162,7 +162,8 @@ export const Home = (): JSX.Element => {
   const handleBlurTextArea = useCallback(() => {
     updatePdf(displayHtml)
     updateIframe(displayHtml)
-  }, [displayHtml])
+  }, [updatePdf, updateIframe, displayHtml])
+
   useEffect(() => {
     console.log('load: ', Date.now())
     if (process.browser) {
@@ -188,7 +189,12 @@ export const Home = (): JSX.Element => {
           onBlur={handleBlurTextArea}
           rows={10}
         />
-        <iframe src={iframeUrl} width="100%" height="400px" />
+        <iframe
+          title="Preview HTML"
+          src={iframeUrl}
+          width="100%"
+          height="400px"
+        />
         <button onClick={() => console.log(pdfBlob)}>Debug console.</button>
         <button onClick={() => doc.current.save(Date.now() + '.pdf')}>
           Download pdf

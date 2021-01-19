@@ -1,3 +1,4 @@
+import * as pdfjsLib from 'pdfjs-dist'
 import {
   FC,
   forwardRef,
@@ -7,7 +8,6 @@ import {
   useRef,
   useState,
 } from 'react'
-import * as pdfjsLib from 'pdfjs-dist'
 import 'pdfjs-dist/web/pdf_viewer.css'
 
 // TODO: optimize import timing.
@@ -73,7 +73,7 @@ export const usePdfViewer = ({
         renderPdfViewer(pdf)
       })
     },
-    [data, renderPdfViewer]
+    [renderPdfViewer]
   )
 
   const loadPdfData = useCallback(
@@ -83,7 +83,7 @@ export const usePdfViewer = ({
         renderPdfViewer(pdf)
       })
     },
-    [data, renderPdfViewer]
+    [renderPdfViewer]
   )
 
   const load = useCallback(() => {
@@ -113,7 +113,7 @@ export const usePdfViewer = ({
 
 export const PdfRenderArea = forwardRef<HTMLDivElement>((props, ref) => {
   return (
-    <div ref={ref} tabIndex={0}>
+    <div ref={ref}>
       <div id="viewer" className="pdfViewer" />
     </div>
   )

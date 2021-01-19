@@ -1,8 +1,9 @@
 import Head from 'next/head'
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import { HTMLFontFace, jsPDF } from 'jspdf'
 import { PdfViewer } from '../components/PdfViewer'
 import { usePreviewIframe } from '../hooks/usePreviewIframe'
+import { useInput } from '../hooks/useInput'
 
 // Refferences: https://github.com/MrRio/jsPDF/pull/3040/files#diff-539eefab6f8ab52ca4b421fe2d8964bdaf77aa47ac8146edb374af84eaaee46d
 const fontFaces: HTMLFontFace[] = [
@@ -78,39 +79,39 @@ const toFontFaceRule = (fontFace: HTMLFontFace) => {
   `
 }
 
+const initCss = `
+${fontFaces.map(toFontFaceRule).join('\n')}
+body {
+  font-size: 14px;
+}
+
+.sans-serif {
+  font-family: sans-serif;
+}
+.roboto {
+  font-family: 'Roboto';
+}
+
+.generic {
+  font-family: monospace; 
+} 
+.default {
+  font-family: serif;
+}
+.bold {
+  font-weight: bold;
+}
+
+.italic {
+  font-style: italic;
+}
+
+.mouhitsu {
+  font-family: 'Mouhitsu';
+}
+`
 const initHtml = `
 <div style="width: 200px; height: 200px;"> 
-  <style>
-    ${fontFaces.map(toFontFaceRule)}
-    body {
-      font-size: 14px;
-    }
-
-    .sans-serif {
-      font-family: sans-serif;
-    }
-    .roboto {
-      font-family: 'Roboto';
-    }
-    
-    .generic {
-      font-family: monospace; 
-    } 
-    .default {
-      font-family: serif;
-    }
-    .bold {
-      font-weight: bold;
-    }
-
-    .italic {
-      font-style: italic;
-    }
-
-    .mouhitsu {
-      font-family: 'Mouhitsu';
-    }
-  </style>
   <p class="default">
   The quick brown fox jumps over the lazy dog (default)
   <p>
@@ -135,48 +136,37 @@ const initHtml = `
     The quick brown fox jumps over the lazy dog (roboto bold italic)
     <p> 
   </div>
-  
 </div>`
 
 export const Home = (): JSX.Element => {
-  const [html, setHtml] = useState(initHtml)
+  const [html, { handleInput: handleChangeForHtml }] = useInput(initHtml)
+  const [css, { handleInput: handleChangeForCss }] = useInput(initCss)
+  const displayHtml = useMemo(
+    () => '<body>' + '<style>' + css + '</style>' + html + '</body>',
+    [css, html]
+  )
   const [pdfBlob, setPdfBlob] = useState<string>('')
-  const [iframeUrl, updateIframe] = usePreviewIframe(html)
+  const [iframeUrl, updateIframe] = usePreviewIframe(displayHtml)
   // const [isLoading, setLoading] = useState(true)
   const doc = useRef(new jsPDF())
-  const updatePdf = useCallback(async (htmlString: string) => {
+  const updatePdf = useCallback(async (html: string) => {
     doc.current = new jsPDF()
     // TODO: Fix render japanese.
     // reffernces: https://github.com/MrRio/jsPDF/pull/3040
-    await doc.current.html(htmlString, {
+    await doc.current.html(html, {
       fontFaces,
       jsPDF: doc.current,
     })
-    // refferences: https://github.com/MrRio/jsPDF/blob/master/test/specs/japanese.spec.js
-    // const fontBlob = loadBinaryResource('/MouhitsuBold.ttf')
-    // doc.current.addFileToVFS("MouhitsuBold.ttf", fontBlob );
-    // doc.current.addFont("MouhitsuBold.ttf", "Mouhitsu", "bold");
-    // doc.current.setFont("Mouhitsu", "bold"); // set font
-    // doc.current.setLanguage("ja");
-    // doc.current.setFontSize(20);
-    // doc.current.text("なに", 20, 20);
-    // console.log(worker)
     setPdfBlob(doc.current.output())
   }, [])
-  const handleChangeTextArea = useCallback(
-    (ev: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setHtml(ev.target.value)
-    },
-    [setHtml]
-  )
   const handleBlurTextArea = useCallback(() => {
-    updatePdf(html)
-    updateIframe(html)
-  }, [html])
+    updatePdf(displayHtml)
+    updateIframe(displayHtml)
+  }, [displayHtml])
   useEffect(() => {
     console.log('load: ', Date.now())
     if (process.browser) {
-      updatePdf(html)
+      updatePdf(displayHtml)
     }
   }, [])
   return (
@@ -188,7 +178,13 @@ export const Home = (): JSX.Element => {
       <div className="container">
         <textarea
           value={html}
-          onChange={handleChangeTextArea}
+          onChange={handleChangeForHtml}
+          onBlur={handleBlurTextArea}
+          rows={10}
+        />
+        <textarea
+          value={css}
+          onChange={handleChangeForCss}
           onBlur={handleBlurTextArea}
           rows={10}
         />

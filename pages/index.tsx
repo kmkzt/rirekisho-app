@@ -1,4 +1,4 @@
-import Form from '@rjsf/core'
+// import Form from '@rjsf/core'
 import { HTMLFontFace, jsPDF } from 'jspdf'
 import Head from 'next/head'
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
@@ -41,13 +41,13 @@ export const Home = (): JSX.Element => {
     })
     setPdfBlob(doc.current.output())
   }, [])
-  const handleChangeFontFaces = useCallback(
-    (ev) => {
-      console.log(ev)
-      // setFontFaces(ev.formData)
-    },
-    [setFontFaces]
-  )
+  // const handleChangeFontFaces = useCallback(
+  //   (ev) => {
+  //     console.log(ev)
+  //     // setFontFaces(ev.formData)
+  //   },
+  //   [setFontFaces]
+  // )
   const handleBlurTextArea = useCallback(() => {
     updatePdf(displayHtml)
     updateIframe(displayHtml)
@@ -82,6 +82,7 @@ export const Home = (): JSX.Element => {
           onBlur={handleBlurTextArea}
           rows={10}
         />
+        {/* TODO: Rendering error
         <Form
           schema={{
             type: 'array',
@@ -105,7 +106,7 @@ export const Home = (): JSX.Element => {
           }}
           formData={exampleFontFaces}
           onChange={handleChangeFontFaces}
-        />
+        /> */}
         <iframe
           title="Preview HTML"
           src={iframeUrl}

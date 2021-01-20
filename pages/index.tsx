@@ -32,7 +32,13 @@ export const Home = (): JSX.Element => {
   const doc = useRef(new jsPDF())
   // const [isLoading, setLoading] = useState(true)
   const updatePdf = useCallback(async (html: string) => {
-    doc.current = new jsPDF()
+    doc.current = new jsPDF({
+      orientation: 'l',
+      unit: 'px',
+      format: 'a4',
+      compress: false,
+      precision: 16,
+    })
     // TODO: Fix render japanese.
     // reffernces: https://github.com/MrRio/jsPDF/pull/3040
     await doc.current.html(html, {
@@ -62,11 +68,12 @@ export const Home = (): JSX.Element => {
     <>
       <Head>
         <title>Create Next App</title>
-        {/* For react-jsonschema-form */}
+        {/* For react-jsonschema-form 
         <link
           rel="stylesheet"
           href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
         ></link>
+        */}
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="container">

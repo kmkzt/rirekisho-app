@@ -53,117 +53,19 @@ export const exampleFontFaces: HTMLFontFace[] = [
       },
     ],
   },
-
-  {
-    family: 'Mouhitsu',
-    src: [
-      {
-        url: 'http://localhost:3000/MouhitsuBold.ttf',
-        format: 'truetype',
-      },
-    ],
-  },
-  {
-    family: 'Roboto',
-    weight: 400,
-    src: [
-      {
-        url: 'http://localhost:3000/Roboto/Roboto-Regular.ttf',
-        format: 'truetype',
-      },
-    ],
-  },
-  {
-    family: 'Roboto',
-    weight: 700,
-    src: [
-      {
-        url: 'http://localhost:3000/Roboto/Roboto-Bold.ttf',
-        format: 'truetype',
-      },
-    ],
-  },
-  {
-    family: 'Roboto',
-    weight: 'bold',
-    style: 'italic',
-    src: [
-      {
-        url: 'http://localhost:3000/Roboto/Roboto-BoldItalic.ttf',
-        format: 'truetype',
-      },
-    ],
-  },
-  {
-    family: 'Roboto',
-    style: 'italic',
-    src: [
-      {
-        url: 'http://localhost:3000/Roboto/Roboto-Italic.ttf',
-        format: 'truetype',
-      },
-    ],
-  },
 ]
 
 export const exampleCss = `
-body {
-  font-size: 14px;
-}
-.koruri {
+* {
   font-family: 'Koruri';
-}
-.sans-serif {
-  font-family: sans-serif;
-}
-.roboto {
-  font-family: 'Roboto';
-}
-
-.generic {
-  font-family: monospace; 
-} 
-.default {
-  font-family: serif;
-}
-.bold {
-  font-weight: bold;
-}
-
-.italic {
-  font-style: italic;
-}
-
-.mouhitsu {
-  font-family: 'Mouhitsu';
 }
 `
 
 export const exampleHtml = `
-<div style="width: 200px; height: 200px;"> 
-  <p class="koruri">こるり koruri</p>
-  <p class="default">
-  The quick brown fox jumps over the lazy dog (default)
-  <p>
-  <p class="generic">
-  The quick brown fox jumps over the lazy dog (generic)
-  <p>
-  <p class="sans-serif">
-  The quick brown fox jumps over the lazy dog (sans-serif)
-  <p>
-  <p class="mouhitsu">なに</p>
-  <div class="roboto">
-    <p>
-    The quick brown fox jumps over the lazy dog (roboto)
-    <p>
-    <p class="bold">
-    The quick brown fox jumps over the lazy dog (roboto bold)
-    <p>
-    <p class="italic">
-    The quick brown fox jumps over the lazy dog (roboto italic)
-    <p>
-    <p class="bold italic">
-    The quick brown fox jumps over the lazy dog (roboto bold italic)
-    <p> 
-  </div>
-</div>`
+  <h1>あいうえお</h1>
+  <h2>かきくけこ</h2>
+  <h3>さしすせそ</h3>
+  <h4>たちつてと</h4>
+  <h5>なにぬねの</h5>
+  <h6>はひふへほ</h6>
+  <p>まみむめも</p>`

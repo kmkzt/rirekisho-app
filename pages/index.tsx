@@ -23,7 +23,10 @@ export const Home = (): JSX.Element => {
       fontfaces2style(fontFaces) +
       css +
       '</style>' +
+      // For A3 pixel size. TODO: Compatible paper size.
+      '<div style="width: 1587px; height: 1122px;">' +
       html +
+      '</div>' +
       '</body>',
     [css, html, fontFaces]
   )
@@ -35,7 +38,7 @@ export const Home = (): JSX.Element => {
     doc.current = new jsPDF({
       orientation: 'l',
       unit: 'px',
-      format: 'a4',
+      format: 'a3',
       compress: false,
       precision: 16,
     })

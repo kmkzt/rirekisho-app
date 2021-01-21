@@ -1,7 +1,14 @@
 // import Form from '@rjsf/core'
-import { HTMLFontFace, jsPDF } from 'jspdf'
+import { jsPDF } from 'jspdf'
 import Head from 'next/head'
-import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
+import {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  InputHTMLAttributes,
+} from 'react'
 import { PdfViewer } from '../components/PdfViewer'
 import { useInput } from '../hooks/useInput'
 import { usePreviewIframe } from '../hooks/usePreviewIframe'
@@ -12,10 +19,25 @@ import {
 } from '../mocks/htmlExampleData'
 import { fontfaces2style } from '../utils/fontfaces2style'
 
+type H2cOptKey = 'scale' | 'scrollX' | 'scrollY'
+type H2cOptsConfig = {
+  [key in H2cOptKey]: InputHTMLAttributes<HTMLInputElement>
+}
+const editH2cOptsConfig: H2cOptsConfig = {
+  scale: { type: 'number', min: 0.1, max: 3, step: 0.05 },
+  scrollX: { type: 'number', step: 1 },
+  scrollY: { type: 'number', step: 1 },
+}
+const editH2cOptKeys: Array<H2cOptKey> = Object.keys(editH2cOptsConfig) as any
+
 export const Home = (): JSX.Element => {
   const [html, { handleInput: handleChangeForHtml }] = useInput(exampleHtml)
   const [css, { handleInput: handleChangeForCss }] = useInput(exampleCss)
-  const [scale, setScale] = useState(0.5)
+  const [h2cOpts, setH2cOpts] = useState<{ [key in H2cOptKey]: number }>({
+    scale: 0.7,
+    scrollX: 70,
+    scrollY: 40,
+  })
   const [fontFaces, setFontFaces] = useState(exampleFontFaces)
   const displayHtml = useMemo(
     () =>
@@ -24,17 +46,13 @@ export const Home = (): JSX.Element => {
       fontfaces2style(fontFaces) +
       css +
       '</style>' +
-      // For A3 pixel size. TODO: Compatible paper size.
-      // '<div style="width: 1587px; height: 1122px;">' +
       html +
-      // '</div>' +
       '</body>',
     [css, html, fontFaces]
   )
   const [pdfBlob, setPdfBlob] = useState<string>('')
   const [iframeUrl, updateIframe] = usePreviewIframe(displayHtml)
   const doc = useRef(new jsPDF())
-  // const [isLoading, setLoading] = useState(true)
   const updatePdf = useCallback(async () => {
     doc.current = new jsPDF({
       orientation: 'l',
@@ -49,11 +67,13 @@ export const Home = (): JSX.Element => {
       fontFaces: exampleFontFaces,
       jsPDF: doc.current,
       html2canvas: {
-        scale,
+        ...h2cOpts,
+        logging: false,
       },
     })
+
     setPdfBlob(doc.current.output())
-  }, [scale, displayHtml])
+  }, [h2cOpts, displayHtml])
   // const handleChangeFontFaces = useCallback(
   //   (ev) => {
   //     console.log(ev)
@@ -61,12 +81,15 @@ export const Home = (): JSX.Element => {
   //   },
   //   [setFontFaces]
   // )
-  const handleChangeScale = useCallback(
-    (ev) => {
-      setScale(ev.target.value)
-      updatePdf()
+  const handleChangeH2cOpts = useCallback(
+    (ev: React.ChangeEvent<HTMLInputElement>) => {
+      if (!editH2cOptKeys.includes(ev.target.name as any)) return
+      setH2cOpts({
+        ...h2cOpts,
+        [ev.target.name]: +ev.target.value,
+      })
     },
-    [updatePdf]
+    [h2cOpts]
   )
   const handleBlurTextArea = useCallback(() => {
     updatePdf()
@@ -135,17 +158,19 @@ export const Home = (): JSX.Element => {
           height="400px"
         />
         <div style={{ display: 'flex' }}>
-          <label>
-            Scale:{' '}
-            <input
-              type="number"
-              value={scale}
-              step={0.1}
-              min={0.1}
-              max={3}
-              onChange={handleChangeScale}
-            />
-          </label>
+          {editH2cOptKeys.map((optName: H2cOptKey, i) => (
+            <label key={i}>
+              {optName}:
+              <input
+                name={optName}
+                type="number"
+                value={h2cOpts[optName]}
+                onChange={handleChangeH2cOpts}
+                onBlur={updatePdf}
+                {...editH2cOptsConfig[optName]}
+              />
+            </label>
+          ))}
           <button onClick={() => console.log(pdfBlob)}>Debug console.</button>
           <button onClick={() => doc.current.save(Date.now() + '.pdf')}>
             Download pdf

@@ -4953,9 +4953,10 @@ jsonpointer@^4.0.1:
   resolved "https://registry.npmjs.org/jsonpointer/-/jsonpointer-4.1.0.tgz#501fb89986a2389765ba09e6053299ceb4f2c2cc"
   integrity sha512-CXcRvMyTlnR53xMcKnuMzfCA5i/nfblTnnr74CZb6C4vG39eu6w51t7nKmU5MfLfbTgGItliNyjO/ciNPDqClg==
 
-"jspdf@https://github.com/MrRio/jsPDF/archive/v2.3.0.tar.gz":
+jspdf@2.3.0:
   version "2.3.0"
-  resolved "https://github.com/MrRio/jsPDF/archive/v2.3.0.tar.gz#5f9c1ec787d39803a61842fbd94859a53d98a520"
+  resolved "https://registry.npmjs.org/jspdf/-/jspdf-2.3.0.tgz#96d5f5e7b104b4d542e203a68299b40cc88434ff"
+  integrity sha512-KdWe3y5YGjuD8E3Yv1vN8BMuuaQR1jvLTlcZ4dQxUSr1ZveuTv1CnyXyafNL7xfi4eDcIdzs6z9tb9JRDiDCbg==
   dependencies:
     atob "^2.1.2"
     btoa "^1.2.1"

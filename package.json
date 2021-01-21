@@ -24,7 +24,7 @@
     ]
   },
   "dependencies": {
-    "jspdf": "https://github.com/MrRio/jsPDF/archive/v2.3.0.tar.gz",
+    "jspdf": "2.3.0",
     "next": "10.0.4",
     "pdfjs-dist": "2.5.207",
     "react": "17.0.1",

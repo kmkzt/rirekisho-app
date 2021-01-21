@@ -43,7 +43,9 @@ export const Home = (): JSX.Element => {
       fontfaces2style(fontFaces) +
       css +
       '</style>' +
+      '<div style="min-width:100vw">' + // For rendering of jspdf.
       html +
+      '</div>' +
       '</body>',
     [css, html, fontFaces]
   )

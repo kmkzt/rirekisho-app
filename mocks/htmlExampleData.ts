@@ -1,9 +1,10 @@
 import { HTMLFontFace } from 'jspdf'
 
-const HOST = process.env.VERCEL_URL
-  ? `//${process.env.VERCEL_URL}`
+//refference: https://vercel.com/docs/environment-variables#system-environment-variables
+const HOST = process.env.NEXT_PUBLIC_VERCEL_URL
+  ? `//${process.env.NEXT_PUBLIC_VERCEL_URL}`
   : `//localhost:3000`
-// TODO: Fix hostname
+
 // Refferences: https://github.com/MrRio/jsPDF/pull/3040/files#diff-539eefab6f8ab52ca4b421fe2d8964bdaf77aa47ac8146edb374af84eaaee46d
 export const exampleFontFaces: HTMLFontFace[] = [
   {

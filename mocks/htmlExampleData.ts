@@ -1,5 +1,8 @@
 import { HTMLFontFace } from 'jspdf'
 
+const HOST = process.env.VERCEL_URL
+  ? `//${process.env.VERCEL_URL}`
+  : `//localhost:3000`
 // TODO: Fix hostname
 // Refferences: https://github.com/MrRio/jsPDF/pull/3040/files#diff-539eefab6f8ab52ca4b421fe2d8964bdaf77aa47ac8146edb374af84eaaee46d
 export const exampleFontFaces: HTMLFontFace[] = [
@@ -8,7 +11,7 @@ export const exampleFontFaces: HTMLFontFace[] = [
     weight: 300,
     src: [
       {
-        url: 'http://localhost:3000/koruri/Koruri-Light.ttf',
+        url: `${HOST}/koruri/Koruri-Light.ttf`,
         format: 'truetype',
       },
     ],
@@ -18,7 +21,7 @@ export const exampleFontFaces: HTMLFontFace[] = [
     weight: 400,
     src: [
       {
-        url: 'http://localhost:3000/koruri/Koruri-Regular.ttf',
+        url: `${HOST}/koruri/Koruri-Regular.ttf`,
         format: 'truetype',
       },
     ],
@@ -28,7 +31,7 @@ export const exampleFontFaces: HTMLFontFace[] = [
     weight: 500,
     src: [
       {
-        url: 'http://localhost:3000/koruri/Koruri-Semibold.ttf',
+        url: `${HOST}/koruri/Koruri-Semibold.ttf`,
         format: 'truetype',
       },
     ],
@@ -38,7 +41,7 @@ export const exampleFontFaces: HTMLFontFace[] = [
     weight: 700,
     src: [
       {
-        url: 'http://localhost:3000/koruri/Koruri-Bold.ttf',
+        url: `${HOST}/koruri/Koruri-Bold.ttf`,
         format: 'truetype',
       },
     ],
@@ -48,7 +51,7 @@ export const exampleFontFaces: HTMLFontFace[] = [
     weight: 900,
     src: [
       {
-        url: 'http://localhost:3000/koruri/Koruri-Extrabold.ttf',
+        url: `${HOST}/koruri/Koruri-Extrabold.ttf`,
         format: 'truetype',
       },
     ],

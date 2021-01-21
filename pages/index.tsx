@@ -10,13 +10,10 @@ import {
   InputHTMLAttributes,
 } from 'react'
 import { PdfViewer } from '../components/PdfViewer'
+import * as rirekisho from '../data/template/rirekisho'
 import { useInput } from '../hooks/useInput'
 import { usePreviewIframe } from '../hooks/usePreviewIframe'
-import {
-  exampleFontFaces,
-  exampleCss,
-  exampleHtml,
-} from '../mocks/htmlExampleData'
+import { exampleFontFaces } from '../mocks/htmlExampleData'
 import { fontfaces2style } from '../utils/fontfaces2style'
 
 type H2cOptKey = 'scale' | 'scrollX' | 'scrollY'
@@ -31,8 +28,8 @@ const editH2cOptsConfig: H2cOptsConfig = {
 const editH2cOptKeys: Array<H2cOptKey> = Object.keys(editH2cOptsConfig) as any
 
 export const Home = (): JSX.Element => {
-  const [html, { handleInput: handleChangeForHtml }] = useInput(exampleHtml)
-  const [css, { handleInput: handleChangeForCss }] = useInput(exampleCss)
+  const [html, { handleInput: handleChangeForHtml }] = useInput(rirekisho.html)
+  const [css, { handleInput: handleChangeForCss }] = useInput(rirekisho.css)
   const [h2cOpts, setH2cOpts] = useState<{ [key in H2cOptKey]: number }>({
     scale: 0.7,
     scrollX: 70,

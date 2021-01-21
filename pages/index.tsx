@@ -15,6 +15,7 @@ import { fontfaces2style } from '../utils/fontfaces2style'
 export const Home = (): JSX.Element => {
   const [html, { handleInput: handleChangeForHtml }] = useInput(exampleHtml)
   const [css, { handleInput: handleChangeForCss }] = useInput(exampleCss)
+  const [scale, setScale] = useState(0.5)
   const [fontFaces, setFontFaces] = useState(exampleFontFaces)
   const displayHtml = useMemo(
     () =>
@@ -24,9 +25,9 @@ export const Home = (): JSX.Element => {
       css +
       '</style>' +
       // For A3 pixel size. TODO: Compatible paper size.
-      '<div style="width: 1587px; height: 1122px;">' +
+      // '<div style="width: 1587px; height: 1122px;">' +
       html +
-      '</div>' +
+      // '</div>' +
       '</body>',
     [css, html, fontFaces]
   )
@@ -34,7 +35,7 @@ export const Home = (): JSX.Element => {
   const [iframeUrl, updateIframe] = usePreviewIframe(displayHtml)
   const doc = useRef(new jsPDF())
   // const [isLoading, setLoading] = useState(true)
-  const updatePdf = useCallback(async (html: string) => {
+  const updatePdf = useCallback(async () => {
     doc.current = new jsPDF({
       orientation: 'l',
       unit: 'px',
@@ -44,12 +45,15 @@ export const Home = (): JSX.Element => {
     })
     // TODO: Fix render japanese.
     // reffernces: https://github.com/MrRio/jsPDF/pull/3040
-    await doc.current.html(html, {
+    await doc.current.html(displayHtml, {
       fontFaces: exampleFontFaces,
       jsPDF: doc.current,
+      html2canvas: {
+        scale,
+      },
     })
     setPdfBlob(doc.current.output())
-  }, [])
+  }, [scale, displayHtml])
   // const handleChangeFontFaces = useCallback(
   //   (ev) => {
   //     console.log(ev)
@@ -57,14 +61,21 @@ export const Home = (): JSX.Element => {
   //   },
   //   [setFontFaces]
   // )
+  const handleChangeScale = useCallback(
+    (ev) => {
+      setScale(ev.target.value)
+      updatePdf()
+    },
+    [updatePdf]
+  )
   const handleBlurTextArea = useCallback(() => {
-    updatePdf(displayHtml)
+    updatePdf()
     updateIframe(displayHtml)
   }, [updatePdf, updateIframe, displayHtml])
 
   useEffect(() => {
     if (process.browser) {
-      updatePdf(displayHtml)
+      updatePdf()
     }
   }, [])
   return (
@@ -123,10 +134,23 @@ export const Home = (): JSX.Element => {
           width="100%"
           height="400px"
         />
-        <button onClick={() => console.log(pdfBlob)}>Debug console.</button>
-        <button onClick={() => doc.current.save(Date.now() + '.pdf')}>
-          Download pdf
-        </button>
+        <div style={{ display: 'flex' }}>
+          <label>
+            Scale:{' '}
+            <input
+              type="number"
+              value={scale}
+              step={0.1}
+              min={0.1}
+              max={3}
+              onChange={handleChangeScale}
+            />
+          </label>
+          <button onClick={() => console.log(pdfBlob)}>Debug console.</button>
+          <button onClick={() => doc.current.save(Date.now() + '.pdf')}>
+            Download pdf
+          </button>
+        </div>
         <PdfViewer data={pdfBlob} />
       </div>
     </>

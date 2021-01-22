@@ -1,8 +1,5 @@
 // refferrence: https://codepen.io/yug1224/pen/oYaOZa
 export const css = `
-* {
-  font-family: 'Koruri';
-}
 html {
   font-size: 62.5%;
 }

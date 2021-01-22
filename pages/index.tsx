@@ -10,11 +10,11 @@ import {
   InputHTMLAttributes,
 } from 'react'
 import { PdfViewer } from '../components/PdfViewer'
-import * as rirekisho from '../data/template/rirekisho'
+import { fontMap as defaultFontMap } from '../constants/font'
+import * as rirekisho from '../constants/template/rirekisho'
 import { useInput } from '../hooks/useInput'
 import { usePreviewIframe } from '../hooks/usePreviewIframe'
-import { exampleFontFaces } from '../mocks/htmlExampleData'
-import { fontfaces2style } from '../utils/fontfaces2style'
+import { fontfaces2style, convertFontFaces } from '../utils/fontfaces2style'
 
 type H2cOptKey = 'scale' | 'scrollX' | 'scrollY'
 type H2cOptsConfig = {
@@ -27,6 +27,7 @@ const editH2cOptsConfig: H2cOptsConfig = {
 }
 const editH2cOptKeys: Array<H2cOptKey> = Object.keys(editH2cOptsConfig) as any
 
+const fontFamilyName = 'moji'
 export const Home = (): JSX.Element => {
   const [html, { handleInput: handleChangeForHtml }] = useInput(rirekisho.html)
   const [css, { handleInput: handleChangeForCss }] = useInput(rirekisho.css)
@@ -35,12 +36,16 @@ export const Home = (): JSX.Element => {
     scrollX: 70,
     scrollY: 40,
   })
-  const [fontFaces, setFontFaces] = useState(exampleFontFaces)
+  const [fontMap, setFontMp] = useState(defaultFontMap)
+  const fontFaces = useMemo(() => convertFontFaces(fontFamilyName, fontMap), [
+    fontMap,
+  ])
   const displayHtml = useMemo(
     () =>
       '<body>' +
       '<style>' +
       fontfaces2style(fontFaces) +
+      `* { font-family: ${fontFamilyName} }` +
       css +
       '</style>' +
       '<div style="min-width:100vw">' + // For rendering of jspdf.
@@ -63,7 +68,7 @@ export const Home = (): JSX.Element => {
     // TODO: Fix render japanese.
     // reffernces: https://github.com/MrRio/jsPDF/pull/3040
     await doc.current.html(displayHtml, {
-      fontFaces: exampleFontFaces,
+      fontFaces,
       jsPDF: doc.current,
       html2canvas: {
         ...h2cOpts,

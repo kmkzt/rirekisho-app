@@ -8,13 +8,19 @@ import {
   useCallback,
   useMemo,
   InputHTMLAttributes,
+  FocusEventHandler,
 } from 'react'
 import { PdfViewer } from '../components/PdfViewer'
 import { fontMap as defaultFontMap } from '../constants/font'
 import * as rirekisho from '../constants/template/rirekisho'
 import { useInput } from '../hooks/useInput'
 import { usePreviewIframe } from '../hooks/usePreviewIframe'
-import { fontfaces2style, convertFontFaces } from '../utils/fontfaces2style'
+import {
+  fontfaces2style,
+  convertFontFaces,
+  fontWeightList,
+  FontWeight,
+} from '../utils/fontfaces2style'
 
 type H2cOptKey = 'scale' | 'scrollX' | 'scrollY'
 type H2cOptsConfig = {
@@ -36,23 +42,29 @@ export const Home = (): JSX.Element => {
     scrollX: 70,
     scrollY: 40,
   })
-  const [fontMap, setFontMp] = useState(defaultFontMap)
+  const [fontMap, setFontMap] = useState(defaultFontMap)
   const fontFaces = useMemo(() => convertFontFaces(fontFamilyName, fontMap), [
     fontMap,
   ])
+  const fontFamilyStyle = useMemo(() => fontfaces2style(fontFaces), [fontFaces])
   const displayHtml = useMemo(
     () =>
       '<body>' +
       '<style>' +
-      fontfaces2style(fontFaces) +
-      `* { font-family: ${fontFamilyName} }` +
+      fontFamilyStyle +
+      `\n * { font-family: ${fontFamilyName} }\n` +
       css +
       '</style>' +
       '<div style="min-width:100vw">' + // For rendering of jspdf.
       html +
       '</div>' +
       '</body>',
-    [css, html, fontFaces]
+    [css, html, fontFamilyStyle]
+  )
+  const weightList = useMemo(
+    () =>
+      fontWeightList.filter((w) => !Object.keys(fontMap).includes(w as any)),
+    [fontMap]
   )
   const [pdfBlob, setPdfBlob] = useState<string>('')
   const [iframeUrl, updateIframe] = usePreviewIframe(displayHtml)
@@ -77,7 +89,7 @@ export const Home = (): JSX.Element => {
     })
 
     setPdfBlob(doc.current.output())
-  }, [h2cOpts, displayHtml])
+  }, [h2cOpts, fontFaces, displayHtml])
   // const handleChangeFontFaces = useCallback(
   //   (ev) => {
   //     console.log(ev)
@@ -85,6 +97,10 @@ export const Home = (): JSX.Element => {
   //   },
   //   [setFontFaces]
   // )
+  const updatePreview = useCallback(() => {
+    updatePdf()
+    updateIframe(displayHtml)
+  }, [updatePdf, updateIframe, displayHtml])
   const handleChangeH2cOpts = useCallback(
     (ev: React.ChangeEvent<HTMLInputElement>) => {
       if (!editH2cOptKeys.includes(ev.target.name as any)) return
@@ -95,10 +111,29 @@ export const Home = (): JSX.Element => {
     },
     [h2cOpts]
   )
-  const handleBlurTextArea = useCallback(() => {
-    updatePdf()
-    updateIframe(displayHtml)
-  }, [updatePdf, updateIframe, displayHtml])
+  const handleBlurFontWeight = useCallback(
+    (key: FontWeight): FocusEventHandler<HTMLSelectElement> => (ev) => {
+      const { [key]: value, ...rest } = fontMap
+      if (!ev.target.value) return
+      setFontMap({
+        ...rest,
+        [ev.target.value]: value,
+      } as any)
+      updatePreview()
+    },
+    [fontMap, updatePreview]
+  )
+
+  const handleBlurFontUrl = useCallback(
+    (key: FontWeight): FocusEventHandler<HTMLInputElement> => (ev) => {
+      setFontMap({
+        ...fontMap,
+        [key]: ev.target.value,
+      })
+      updatePreview()
+    },
+    [fontMap, updatePreview]
+  )
 
   useEffect(() => {
     if (process.browser) {
@@ -121,15 +156,36 @@ export const Home = (): JSX.Element => {
         <textarea
           value={html}
           onChange={handleChangeForHtml}
-          onBlur={handleBlurTextArea}
+          onBlur={updatePreview}
           rows={10}
         />
         <textarea
           value={css}
           onChange={handleChangeForCss}
-          onBlur={handleBlurTextArea}
+          onBlur={updatePreview}
           rows={10}
         />
+        <div>
+          {Object.entries(fontMap).map(([weight, url], i) => (
+            <div key={weight}>
+              <select
+                defaultValue={weight}
+                onBlur={handleBlurFontWeight(weight as FontWeight)}
+              >
+                {[weight, ...weightList].map((w) => (
+                  <option key={w} value={w}>
+                    {w}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                defaultValue={url}
+                onBlur={handleBlurFontUrl(weight as FontWeight)}
+              />
+            </div>
+          ))}
+        </div>
         {/* TODO: Rendering error
         <Form
           schema={{
@@ -156,6 +212,7 @@ export const Home = (): JSX.Element => {
           onChange={handleChangeFontFaces}
         /> */}
         <iframe
+          /* TODO: Web font not updated. */
           title="Preview HTML"
           src={iframeUrl}
           width="100%"

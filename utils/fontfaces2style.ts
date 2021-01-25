@@ -23,10 +23,22 @@ export const toFontFaceRule = ({
 export const fontfaces2style = (fontFaces: HTMLFontFace[]) =>
   `${fontFaces.map(toFontFaceRule).join('\n')}`
 
+export type FontWeight = Exclude<HTMLFontFace['weight'], undefined | number>
 // TODO: Fix type to avoid having to associate values with all keys.
 export type FontMap = {
-  [key in Exclude<HTMLFontFace['weight'], undefined>]: string[]
+  [key in FontWeight]: string
 }
+export const fontWeightList: Array<FontWeight> = [
+  '100',
+  '200',
+  '300',
+  '400',
+  '500',
+  '600',
+  '700',
+  '800',
+  '900',
+]
 
 // Refferences: https://github.com/MrRio/jsPDF/pull/3040/files#diff-539eefab6f8ab52ca4b421fe2d8964bdaf77aa47ac8146edb374af84eaaee46d
 export const convertFontFaces = (
@@ -34,15 +46,17 @@ export const convertFontFaces = (
   fontMap: FontMap
 ): HTMLFontFace[] => {
   // @ts-expect-error
-  const entry: Array<[keyof FontMap, string[]]> = Object.entries(fontMap)
+  const entry: Array<[keyof FontMap, string]> = Object.entries(fontMap)
   return entry.map(
-    ([weight, srclist]): HTMLFontFace => ({
+    ([weight, url]): HTMLFontFace => ({
       weight,
       family: name,
-      src: srclist.map((url) => ({
-        url,
-        format: 'truetype',
-      })),
+      src: [
+        {
+          url,
+          format: 'truetype',
+        },
+      ],
     })
   )
 }

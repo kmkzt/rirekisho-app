@@ -10,7 +10,7 @@ interface Props {
   onBlur: (ev?: any) => void
   size?: [number, number]
 }
-const CodeTextarea: FC<Props> = ({
+export const CodeTextarea: FC<Props> = ({
   value,
   language,
   onChange,
@@ -21,7 +21,9 @@ const CodeTextarea: FC<Props> = ({
   let editor: monaco.editor.IStandaloneCodeEditor
   useEffect(() => {
     if (!process.browser) return
+    // @ts-expect-error
     if (window.MonacoEnvironment?.getWorkerUrl) return
+    // @ts-expect-error
     window.MonacoEnvironment = {
       getWorkerUrl: function (_moduleId: any, label: string) {
         if (label === 'json') {

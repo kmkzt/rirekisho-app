@@ -11,7 +11,6 @@ import {
   InputHTMLAttributes,
   FocusEventHandler,
 } from 'react'
-import { PdfViewer } from '../components/PdfViewer'
 import { fontMap as defaultFontMap } from '../constants/font'
 import * as rirekisho from '../constants/template/rirekisho'
 import { usePreviewIframe } from '../hooks/usePreviewIframe'
@@ -22,10 +21,13 @@ import {
   FontWeight,
 } from '../utils/fontfaces2style'
 
-const CodeTextarea = dynamic(import('../components/CodeTextarea'), {
+const CodeTextarea = dynamic(() => import('../components/CodeTextarea'), {
   ssr: false,
 })
 
+const PdfViewer = dynamic(() => import('../components/PdfViewer'), {
+  ssr: false,
+})
 type H2cOptKey = 'scale' | 'scrollX' | 'scrollY'
 type H2cOptsConfig = {
   [key in H2cOptKey]: InputHTMLAttributes<HTMLInputElement>

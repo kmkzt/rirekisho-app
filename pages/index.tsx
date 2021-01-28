@@ -1,5 +1,6 @@
 // import Form from '@rjsf/core'
 import { jsPDF } from 'jspdf'
+import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import {
   useEffect,
@@ -13,7 +14,6 @@ import {
 import { PdfViewer } from '../components/PdfViewer'
 import { fontMap as defaultFontMap } from '../constants/font'
 import * as rirekisho from '../constants/template/rirekisho'
-import { useInput } from '../hooks/useInput'
 import { usePreviewIframe } from '../hooks/usePreviewIframe'
 import {
   fontfaces2style,
@@ -21,6 +21,10 @@ import {
   fontWeightList,
   FontWeight,
 } from '../utils/fontfaces2style'
+
+const CodeTextarea = dynamic(import('../components/CodeTextarea'), {
+  ssr: false,
+})
 
 type H2cOptKey = 'scale' | 'scrollX' | 'scrollY'
 type H2cOptsConfig = {
@@ -35,8 +39,8 @@ const editH2cOptKeys: Array<H2cOptKey> = Object.keys(editH2cOptsConfig) as any
 
 const fontFamilyName = 'moji'
 export const Home = (): JSX.Element => {
-  const [html, { handleInput: handleChangeForHtml }] = useInput(rirekisho.html)
-  const [css, { handleInput: handleChangeForCss }] = useInput(rirekisho.css)
+  const [html, setHtml] = useState(rirekisho.html)
+  const [css, setCss] = useState(rirekisho.css)
   const [h2cOpts, setH2cOpts] = useState<{ [key in H2cOptKey]: number }>({
     scale: 0.7,
     scrollX: 70,
@@ -153,17 +157,17 @@ export const Home = (): JSX.Element => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="container">
-        <textarea
+        <CodeTextarea
+          language={'html'}
           value={html}
-          onChange={handleChangeForHtml}
-          onBlur={updatePreview}
-          rows={10}
+          onChange={setHtml}
+          onBlur={console.log}
         />
-        <textarea
+        <CodeTextarea
+          language={'css'}
           value={css}
-          onChange={handleChangeForCss}
-          onBlur={updatePreview}
-          rows={10}
+          onChange={setCss}
+          onBlur={console.log}
         />
         <div>
           {Object.entries(fontMap).map(([weight, url], i) => (

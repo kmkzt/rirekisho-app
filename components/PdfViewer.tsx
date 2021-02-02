@@ -11,7 +11,7 @@ import {
 import 'pdfjs-dist/web/pdf_viewer.css'
 
 // TODO: optimize import timing.
-pdfjsLib.GlobalWorkerOptions.workerSrc = require('pdfjs-dist/build/pdf.worker.entry')
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
 
 interface Props {
   data?: string

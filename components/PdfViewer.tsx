@@ -123,3 +123,5 @@ export const PdfViewer: FC<Props> = (props) => {
     </>
   )
 }
+
+export default PdfViewer

@@ -1,5 +1,6 @@
 // import Form from '@rjsf/core'
 import { jsPDF } from 'jspdf'
+import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import {
   useEffect,
@@ -10,10 +11,9 @@ import {
   InputHTMLAttributes,
   FocusEventHandler,
 } from 'react'
-import { PdfViewer } from '../components/PdfViewer'
+import { isDev } from '../constants/env'
 import { fontMap as defaultFontMap } from '../constants/font'
 import * as rirekisho from '../constants/template/rirekisho'
-import { useInput } from '../hooks/useInput'
 import { usePreviewIframe } from '../hooks/usePreviewIframe'
 import {
   fontfaces2style,
@@ -22,6 +22,13 @@ import {
   FontWeight,
 } from '../utils/fontfaces2style'
 
+const CodeTextarea = dynamic(() => import('../components/CodeTextarea'), {
+  ssr: false,
+})
+
+const PdfViewer = dynamic(() => import('../components/PdfViewer'), {
+  ssr: false,
+})
 type H2cOptKey = 'scale' | 'scrollX' | 'scrollY'
 type H2cOptsConfig = {
   [key in H2cOptKey]: InputHTMLAttributes<HTMLInputElement>
@@ -34,9 +41,12 @@ const editH2cOptsConfig: H2cOptsConfig = {
 const editH2cOptKeys: Array<H2cOptKey> = Object.keys(editH2cOptsConfig) as any
 
 const fontFamilyName = 'moji'
+
+type Mode = 'css' | 'html'
 export const Home = (): JSX.Element => {
-  const [html, { handleInput: handleChangeForHtml }] = useInput(rirekisho.html)
-  const [css, { handleInput: handleChangeForCss }] = useInput(rirekisho.css)
+  const [html, setHtml] = useState(rirekisho.html)
+  const [css, setCss] = useState(rirekisho.css)
+  const [mode, setMode] = useState<Mode>('html')
   const [h2cOpts, setH2cOpts] = useState<{ [key in H2cOptKey]: number }>({
     scale: 0.7,
     scrollX: 70,
@@ -135,6 +145,19 @@ export const Home = (): JSX.Element => {
     [fontMap, updatePreview]
   )
 
+  const handleClickMode = useCallback((m: Mode) => () => setMode(m), [setMode])
+  const handleChangeCode = useCallback(
+    (code: string) => {
+      if (mode === 'html') {
+        setHtml(code)
+        return
+      }
+      if (mode === 'css') {
+        setCss(code)
+      }
+    },
+    [mode]
+  )
   useEffect(() => {
     if (process.browser) {
       updatePdf()
@@ -153,17 +176,23 @@ export const Home = (): JSX.Element => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="container">
-        <textarea
-          value={html}
-          onChange={handleChangeForHtml}
-          onBlur={updatePreview}
-          rows={10}
-        />
-        <textarea
-          value={css}
-          onChange={handleChangeForCss}
-          onBlur={updatePreview}
-          rows={10}
+        <div
+          style={mode === 'html' ? { border: '1px solid #999' } : undefined}
+          onClick={handleClickMode('html')}
+        >
+          HTML
+        </div>
+        <div
+          style={mode === 'css' ? { border: '1px solid #999' } : undefined}
+          onClick={handleClickMode('css')}
+        >
+          CSS
+        </div>
+        <CodeTextarea
+          language={mode === 'html' ? 'html' : 'css'}
+          value={mode === 'html' ? html : css}
+          onChange={handleChangeCode}
+          onBlur={console.log}
         />
         <div>
           {Object.entries(fontMap).map(([weight, url], i) => (
@@ -232,7 +261,9 @@ export const Home = (): JSX.Element => {
               />
             </label>
           ))}
-          <button onClick={() => console.log(pdfBlob)}>Debug console.</button>
+          {isDev && (
+            <button onClick={() => console.log(pdfBlob)}>Debug console.</button>
+          )}
           <button onClick={() => doc.current.save(Date.now() + '.pdf')}>
             Download pdf
           </button>

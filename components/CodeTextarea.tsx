@@ -1,5 +1,5 @@
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api'
-import React, { FC, useRef, useEffect, TextareaHTMLAttributes } from 'react'
+import React, { FC, useRef, useEffect } from 'react'
 
 const WORKER_BASE_PATH = '_next/static/'
 
@@ -18,7 +18,7 @@ export const CodeTextarea: FC<Props> = ({
   size: [width, height] = [500, 300],
 }) => {
   const divEl = useRef<HTMLDivElement>(null)
-  let editor: monaco.editor.IStandaloneCodeEditor
+  const editor = useRef<monaco.editor.IStandaloneCodeEditor>()
   useEffect(() => {
     if (!process.browser) return
     // @ts-expect-error
@@ -43,22 +43,26 @@ export const CodeTextarea: FC<Props> = ({
     }
   }, [])
   useEffect(() => {
-    if (divEl.current) {
-      editor = monaco.editor.create(divEl.current, {
-        value,
-        language,
-      })
+    if (!divEl.current) return
+    editor.current = monaco.editor.create(divEl.current, {
+      value,
+      language,
+    })
 
-      editor.onDidChangeModelContent(
-        (ev: monaco.editor.IModelContentChangedEvent) =>
-          onChange(editor.getValue())
-      )
-      editor.onDidBlurEditorText(onBlur)
-    }
+    editor.current.onDidChangeModelContent(
+      (ev: monaco.editor.IModelContentChangedEvent) => {
+        if (!editor.current) return
+        onChange(editor.current.getValue())
+      }
+    )
+    editor.current.onDidBlurEditorText(onBlur)
     return () => {
-      editor.dispose()
+      if (!editor.current) return
+      editor.current.dispose()
     }
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language])
+
   return (
     <div
       ref={divEl}

@@ -11,6 +11,7 @@ import {
   InputHTMLAttributes,
   FocusEventHandler,
 } from 'react'
+import { isDev } from '../constants/env'
 import { fontMap as defaultFontMap } from '../constants/font'
 import * as rirekisho from '../constants/template/rirekisho'
 import { usePreviewIframe } from '../hooks/usePreviewIframe'
@@ -40,9 +41,12 @@ const editH2cOptsConfig: H2cOptsConfig = {
 const editH2cOptKeys: Array<H2cOptKey> = Object.keys(editH2cOptsConfig) as any
 
 const fontFamilyName = 'moji'
+
+type Mode = 'css' | 'html'
 export const Home = (): JSX.Element => {
   const [html, setHtml] = useState(rirekisho.html)
   const [css, setCss] = useState(rirekisho.css)
+  const [mode, setMode] = useState<Mode>('html')
   const [h2cOpts, setH2cOpts] = useState<{ [key in H2cOptKey]: number }>({
     scale: 0.7,
     scrollX: 70,
@@ -141,6 +145,19 @@ export const Home = (): JSX.Element => {
     [fontMap, updatePreview]
   )
 
+  const handleClickMode = useCallback((m: Mode) => () => setMode(m), [setMode])
+  const handleChangeCode = useCallback(
+    (code: string) => {
+      if (mode === 'html') {
+        setHtml(code)
+        return
+      }
+      if (mode === 'css') {
+        setCss(code)
+      }
+    },
+    [mode]
+  )
   useEffect(() => {
     if (process.browser) {
       updatePdf()
@@ -159,16 +176,22 @@ export const Home = (): JSX.Element => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="container">
+        <div
+          style={mode === 'html' ? { border: '1px solid #999' } : undefined}
+          onClick={handleClickMode('html')}
+        >
+          HTML
+        </div>
+        <div
+          style={mode === 'css' ? { border: '1px solid #999' } : undefined}
+          onClick={handleClickMode('css')}
+        >
+          CSS
+        </div>
         <CodeTextarea
-          language={'html'}
-          value={html}
-          onChange={setHtml}
-          onBlur={console.log}
-        />
-        <CodeTextarea
-          language={'css'}
-          value={css}
-          onChange={setCss}
+          language={mode === 'html' ? 'html' : 'css'}
+          value={mode === 'html' ? html : css}
+          onChange={handleChangeCode}
           onBlur={console.log}
         />
         <div>
@@ -238,7 +261,9 @@ export const Home = (): JSX.Element => {
               />
             </label>
           ))}
-          <button onClick={() => console.log(pdfBlob)}>Debug console.</button>
+          {isDev && (
+            <button onClick={() => console.log(pdfBlob)}>Debug console.</button>
+          )}
           <button onClick={() => doc.current.save(Date.now() + '.pdf')}>
             Download pdf
           </button>

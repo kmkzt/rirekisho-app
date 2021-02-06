@@ -1,9 +1,9 @@
 /* eslint-disable no-undef */
 const { resolve } = require('path')
-const CopyPlugin = require('copy-webpack-plugin')
-const WriteFilePlugin = require('write-file-webpack-plugin')
 const withCSS = require('@zeit/next-css')
+const CopyPlugin = require('copy-webpack-plugin')
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
+const WriteFilePlugin = require('write-file-webpack-plugin')
 
 module.exports = withCSS({
   webpack: (config) => {

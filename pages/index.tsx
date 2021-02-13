@@ -73,6 +73,7 @@ export const Home = (): JSX.Element => {
     () => (language === 'markdown' ? marked(md) : html),
     [language, html, md]
   )
+
   const displayHtml = useMemo(
     () =>
       '<body>' +
@@ -163,9 +164,13 @@ export const Home = (): JSX.Element => {
     [fontMap, updatePreview]
   )
 
-  const handleClickMode = useCallback((m: Language) => () => setLanguage(m), [
-    setLanguage,
-  ])
+  const handleClickLanguage = useCallback(
+    (m: Language) => () => {
+      setLanguage(m)
+    },
+    [setLanguage]
+  )
+
   const handleChangeCode = useCallback(
     (code: string) => {
       if (language === 'html') {
@@ -203,13 +208,13 @@ export const Home = (): JSX.Element => {
       <div className="container">
         <div
           style={language === 'html' ? { border: '1px solid #999' } : undefined}
-          onClick={handleClickMode('html')}
+          onClick={handleClickLanguage('html')}
         >
           HTML
         </div>
         <div
           style={language === 'css' ? { border: '1px solid #999' } : undefined}
-          onClick={handleClickMode('css')}
+          onClick={handleClickLanguage('css')}
         >
           CSS
         </div>
@@ -217,7 +222,7 @@ export const Home = (): JSX.Element => {
           style={
             language === 'markdown' ? { border: '1px solid #999' } : undefined
           }
-          onClick={handleClickMode('markdown')}
+          onClick={handleClickLanguage('markdown')}
         >
           Markdown
         </div>

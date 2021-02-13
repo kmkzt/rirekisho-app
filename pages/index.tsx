@@ -11,6 +11,7 @@ import {
   InputHTMLAttributes,
   FocusEventHandler,
 } from 'react'
+import type { Language } from '../components/CodeTextarea'
 import { isDev } from '../constants/env'
 import { fontMap as defaultFontMap } from '../constants/font'
 import * as rirekisho from '../constants/template/rirekisho'
@@ -21,6 +22,7 @@ import {
   fontWeightList,
   FontWeight,
 } from '../utils/fontfaces2style'
+import marked from '../utils/marked'
 
 const CodeTextarea = dynamic(() => import('../components/CodeTextarea'), {
   ssr: false,
@@ -42,11 +44,11 @@ const editH2cOptKeys: Array<H2cOptKey> = Object.keys(editH2cOptsConfig) as any
 
 const fontFamilyName = 'moji'
 
-type Mode = 'css' | 'html'
 export const Home = (): JSX.Element => {
+  const [md, setMd] = useState('# Hello world')
   const [html, setHtml] = useState(rirekisho.html)
   const [css, setCss] = useState(rirekisho.css)
-  const [mode, setMode] = useState<Mode>('html')
+  const [language, setLanguage] = useState<Language>('html')
   const [h2cOpts, setH2cOpts] = useState<{ [key in H2cOptKey]: number }>({
     scale: 0.7,
     scrollX: 70,
@@ -57,19 +59,29 @@ export const Home = (): JSX.Element => {
     fontMap,
   ])
   const fontFamilyStyle = useMemo(() => fontfaces2style(fontFaces), [fontFaces])
-  const displayHtml = useMemo(
+  const styleSheet = useMemo(
     () =>
-      '<body>' +
       '<style>' +
       fontFamilyStyle +
       `\n * { font-family: ${fontFamilyName} }\n` +
       css +
-      '</style>' +
-      '<div style="min-width:100vw">' + // For rendering of jspdf.
-      html +
+      '</style>',
+    [css, fontFamilyStyle]
+  )
+
+  const contents = useMemo(
+    () => (language === 'markdown' ? marked(md) : html),
+    [language, html, md]
+  )
+  const displayHtml = useMemo(
+    () =>
+      '<body>' +
+      styleSheet +
+      '<div style="min-width:100vw">' +
+      contents +
       '</div>' +
       '</body>',
-    [css, html, fontFamilyStyle]
+    [contents, styleSheet]
   )
   const weightList = useMemo(
     () =>
@@ -79,6 +91,12 @@ export const Home = (): JSX.Element => {
   const [pdfBlob, setPdfBlob] = useState<string>('')
   const [iframeUrl, updateIframe] = usePreviewIframe(displayHtml)
   const doc = useRef(new jsPDF())
+  const editCodeValue = useMemo(() => {
+    if (language === 'html') return html
+    if (language === 'markdown') return md
+    if (language === 'css') return css
+    return ''
+  }, [language, md, html, css])
   const updatePdf = useCallback(async () => {
     doc.current = new jsPDF({
       orientation: 'l',
@@ -145,24 +163,31 @@ export const Home = (): JSX.Element => {
     [fontMap, updatePreview]
   )
 
-  const handleClickMode = useCallback((m: Mode) => () => setMode(m), [setMode])
+  const handleClickMode = useCallback((m: Language) => () => setLanguage(m), [
+    setLanguage,
+  ])
   const handleChangeCode = useCallback(
     (code: string) => {
-      if (mode === 'html') {
+      if (language === 'html') {
         setHtml(code)
         return
       }
-      if (mode === 'css') {
+      if (language === 'css') {
         setCss(code)
+        return
+      }
+      if (language === 'markdown') {
+        setMd(code)
       }
     },
-    [mode]
+    [language]
   )
   useEffect(() => {
     if (process.browser) {
       updatePdf()
     }
   }, [])
+
   return (
     <>
       <Head>
@@ -177,20 +202,28 @@ export const Home = (): JSX.Element => {
       </Head>
       <div className="container">
         <div
-          style={mode === 'html' ? { border: '1px solid #999' } : undefined}
+          style={language === 'html' ? { border: '1px solid #999' } : undefined}
           onClick={handleClickMode('html')}
         >
           HTML
         </div>
         <div
-          style={mode === 'css' ? { border: '1px solid #999' } : undefined}
+          style={language === 'css' ? { border: '1px solid #999' } : undefined}
           onClick={handleClickMode('css')}
         >
           CSS
         </div>
+        <div
+          style={
+            language === 'markdown' ? { border: '1px solid #999' } : undefined
+          }
+          onClick={handleClickMode('markdown')}
+        >
+          Markdown
+        </div>
         <CodeTextarea
-          language={mode === 'html' ? 'html' : 'css'}
-          value={mode === 'html' ? html : css}
+          language={language}
+          value={editCodeValue}
           onChange={handleChangeCode}
           onBlur={console.log}
         />

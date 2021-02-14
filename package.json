@@ -38,6 +38,7 @@
     "@kmkzt/eslint-config": "^0.0.4",
     "@rjsf/core": "2.4.1",
     "@testing-library/react": "10.0.1",
+    "@types/jest": "26.0.20",
     "@types/marked": "1.2.2",
     "@types/node": "13.9.5",
     "@types/pdfjs-dist": "2.1.7",

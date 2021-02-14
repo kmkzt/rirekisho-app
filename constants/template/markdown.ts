@@ -1,3 +1,4 @@
+// @ts-expect-error
 import syntaxStyles from '!!raw-loader!highlight.js/styles/a11y-dark.css' // eslint-disable-line import/no-unresolved
 export const css = `
   /* highlight.js theme: a11y-dark.css */

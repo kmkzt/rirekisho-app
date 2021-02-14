@@ -2,10 +2,10 @@ import * as monaco from 'monaco-editor/esm/vs/editor/editor.api'
 import React, { FC, useRef, useEffect } from 'react'
 
 const WORKER_BASE_PATH = '_next/static/'
-
+export type Language = 'html' | 'css' | 'markdown'
 interface Props {
   value: string
-  language: 'html' | 'css' | 'markdown'
+  language: Language
   onChange: (val: string) => void
   onBlur: (ev?: any) => void
   size?: [number, number]

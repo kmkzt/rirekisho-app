@@ -14,6 +14,7 @@ import {
 import type { Language } from '../components/CodeTextarea'
 import { isDev } from '../constants/env'
 import { fontMap as defaultFontMap } from '../constants/font'
+import * as markdown from '../constants/template/markdown'
 import * as rirekisho from '../constants/template/rirekisho'
 import { usePreviewIframe } from '../hooks/usePreviewIframe'
 import {
@@ -45,10 +46,10 @@ const editH2cOptKeys: Array<H2cOptKey> = Object.keys(editH2cOptsConfig) as any
 const fontFamilyName = 'moji'
 
 export const Home = (): JSX.Element => {
-  const [md, setMd] = useState('# Hello world')
+  const [md, setMd] = useState(markdown.markdown)
   const [html, setHtml] = useState(rirekisho.html)
-  const [css, setCss] = useState(rirekisho.css)
-  const [language, setLanguage] = useState<Language>('html')
+  const [css, setCss] = useState(markdown.css)
+  const [language, setLanguage] = useState<Language>('markdown')
   const [h2cOpts, setH2cOpts] = useState<{ [key in H2cOptKey]: number }>({
     scale: 0.7,
     scrollX: 70,

@@ -15,7 +15,7 @@ export const css = `
     margin: 8px 0;
   }
   code {
-    background: #ccc;
+    background: #222;
     display: block;
   }
   table {

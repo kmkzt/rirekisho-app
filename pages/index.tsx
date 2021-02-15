@@ -10,6 +10,7 @@ import {
   useMemo,
   InputHTMLAttributes,
   FocusEventHandler,
+  FocusEvent,
 } from 'react'
 import type { Language } from '../components/CodeTextarea'
 import { isDev } from '../constants/env'
@@ -92,6 +93,8 @@ export const Home = (): JSX.Element => {
   )
   const [pdfBlob, setPdfBlob] = useState<string>('')
   const [iframeUrl, updateIframe] = usePreviewIframe(displayHtml)
+  const [format, setFormat] = useState('a3')
+  const [orientation, setOrientation] = useState<'l' | 'p'>('l')
   const doc = useRef(new jsPDF())
   const editCodeValue = useMemo(() => {
     if (language === 'html') return html
@@ -101,9 +104,9 @@ export const Home = (): JSX.Element => {
   }, [language, md, html, css])
   const updatePdf = useCallback(async () => {
     doc.current = new jsPDF({
-      orientation: 'l',
+      format,
+      orientation,
       unit: 'px',
-      format: 'a3',
       compress: false,
       precision: 16,
     })
@@ -188,6 +191,23 @@ export const Home = (): JSX.Element => {
     },
     [language]
   )
+
+  const handleBlurFormat = useCallback(
+    (ev: FocusEvent<HTMLSelectElement>) => {
+      setFormat(ev.target.value)
+      updatePreview()
+    },
+    [setFormat, updatePreview]
+  )
+
+  const handleBlurOrientation = useCallback(
+    (ev: FocusEvent<HTMLSelectElement>) => {
+      setOrientation(ev.target.value as 'l' | 'p')
+      updatePreview()
+    },
+    [setOrientation, updatePreview]
+  )
+
   useEffect(() => {
     if (process.browser) {
       updatePdf()
@@ -254,6 +274,35 @@ export const Home = (): JSX.Element => {
             </div>
           ))}
         </div>
+        <div style={{ display: 'flex' }}>
+          <select defaultValue={orientation} onBlur={handleBlurOrientation}>
+            <option value="l">landscape(横)</option>
+            <option value="p">portrait(縦)</option>
+          </select>
+          <select defaultValue={format} onBlur={handleBlurFormat}>
+            <option value="a3">a3</option>
+            <option value="a4">a4</option>
+          </select>
+          {editH2cOptKeys.map((optName: H2cOptKey, i) => (
+            <label key={i}>
+              {optName}:
+              <input
+                name={optName}
+                type="number"
+                value={h2cOpts[optName]}
+                onChange={handleChangeH2cOpts}
+                onBlur={updatePdf}
+                {...editH2cOptsConfig[optName]}
+              />
+            </label>
+          ))}
+          {isDev && (
+            <button onClick={() => console.log(pdfBlob)}>Debug console.</button>
+          )}
+          <button onClick={() => doc.current.save(Date.now() + '.pdf')}>
+            Download pdf
+          </button>
+        </div>
         {/* TODO: Rendering error
         <Form
           schema={{
@@ -286,27 +335,6 @@ export const Home = (): JSX.Element => {
           width="100%"
           height="400px"
         />
-        <div style={{ display: 'flex' }}>
-          {editH2cOptKeys.map((optName: H2cOptKey, i) => (
-            <label key={i}>
-              {optName}:
-              <input
-                name={optName}
-                type="number"
-                value={h2cOpts[optName]}
-                onChange={handleChangeH2cOpts}
-                onBlur={updatePdf}
-                {...editH2cOptsConfig[optName]}
-              />
-            </label>
-          ))}
-          {isDev && (
-            <button onClick={() => console.log(pdfBlob)}>Debug console.</button>
-          )}
-          <button onClick={() => doc.current.save(Date.now() + '.pdf')}>
-            Download pdf
-          </button>
-        </div>
         <PdfViewer data={pdfBlob} />
       </div>
     </>

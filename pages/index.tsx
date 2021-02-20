@@ -1,4 +1,4 @@
-// import Form from '@rjsf/core'
+import { css } from '@emotion/css'
 import { jsPDF } from 'jspdf'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
@@ -13,6 +13,7 @@ import {
   FocusEvent,
 } from 'react'
 import type { Language } from '../components/CodeTextarea'
+import { Tabs } from '../components/Tabs'
 import { isDev } from '../constants/env'
 import { fontMap as defaultFontMap } from '../constants/font'
 import * as markdown from '../constants/template/markdown'
@@ -49,8 +50,9 @@ const fontFamilyName = 'moji'
 export const Home = (): JSX.Element => {
   const [md, setMd] = useState(markdown.markdown)
   const [html, setHtml] = useState(rirekisho.html)
-  const [css, setCss] = useState(markdown.css)
+  const [cssString, setCss] = useState(markdown.css)
   const [language, setLanguage] = useState<Language>('markdown')
+  const [previewMode, setPreviewMode] = useState('iframe')
   const [h2cOpts, setH2cOpts] = useState<{ [key in H2cOptKey]: number }>({
     scale: 0.7,
     scrollX: 70,
@@ -66,9 +68,9 @@ export const Home = (): JSX.Element => {
       '<style>' +
       fontFamilyStyle +
       `\n * { font-family: ${fontFamilyName} }\n` +
-      css +
+      cssString +
       '</style>',
-    [css, fontFamilyStyle]
+    [cssString, fontFamilyStyle]
   )
 
   const contents = useMemo(
@@ -99,9 +101,9 @@ export const Home = (): JSX.Element => {
   const editCodeValue = useMemo(() => {
     if (language === 'html') return html
     if (language === 'markdown') return md
-    if (language === 'css') return css
+    if (language === 'css') return cssString
     return ''
-  }, [language, md, html, css])
+  }, [language, md, html, cssString])
   const updatePdf = useCallback(async () => {
     doc.current = new jsPDF({
       format,
@@ -123,6 +125,9 @@ export const Home = (): JSX.Element => {
 
     setPdfBlob(doc.current.output())
   }, [h2cOpts, fontFaces, displayHtml])
+  const handleChangeLanguage = useCallback((lang) => setLanguage(lang), [
+    setLanguage,
+  ])
   // const handleChangeFontFaces = useCallback(
   //   (ev) => {
   //     console.log(ev)
@@ -166,13 +171,6 @@ export const Home = (): JSX.Element => {
       updatePreview()
     },
     [fontMap, updatePreview]
-  )
-
-  const handleClickLanguage = useCallback(
-    (m: Language) => () => {
-      setLanguage(m)
-    },
-    [setLanguage]
   )
 
   const handleChangeCode = useCallback(
@@ -227,53 +225,6 @@ export const Home = (): JSX.Element => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="container">
-        <div
-          style={language === 'html' ? { border: '1px solid #999' } : undefined}
-          onClick={handleClickLanguage('html')}
-        >
-          HTML
-        </div>
-        <div
-          style={language === 'css' ? { border: '1px solid #999' } : undefined}
-          onClick={handleClickLanguage('css')}
-        >
-          CSS
-        </div>
-        <div
-          style={
-            language === 'markdown' ? { border: '1px solid #999' } : undefined
-          }
-          onClick={handleClickLanguage('markdown')}
-        >
-          Markdown
-        </div>
-        <CodeTextarea
-          language={language}
-          value={editCodeValue}
-          onChange={handleChangeCode}
-          onBlur={console.log}
-        />
-        <div>
-          {Object.entries(fontMap).map(([weight, url], i) => (
-            <div key={weight}>
-              <select
-                defaultValue={weight}
-                onBlur={handleBlurFontWeight(weight as FontWeight)}
-              >
-                {[weight, ...weightList].map((w) => (
-                  <option key={w} value={w}>
-                    {w}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="text"
-                defaultValue={url}
-                onBlur={handleBlurFontUrl(weight as FontWeight)}
-              />
-            </div>
-          ))}
-        </div>
         <div style={{ display: 'flex' }}>
           <select defaultValue={orientation} onBlur={handleBlurOrientation}>
             <option value="l">landscape(横)</option>
@@ -303,39 +254,66 @@ export const Home = (): JSX.Element => {
             Download pdf
           </button>
         </div>
-        {/* TODO: Rendering error
-        <Form
-          schema={{
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                family: { type: 'string' },
-                weight: { type: 'string' },
-                src: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      url: { type: 'string' },
-                      format: { type: 'string' },
-                    },
-                  },
-                },
-              },
-            },
-          }}
-          formData={exampleFontFaces}
-          onChange={handleChangeFontFaces}
-        /> */}
-        <iframe
-          /* TODO: Web font not updated. */
-          title="Preview HTML"
-          src={iframeUrl}
-          width="100%"
-          height="400px"
-        />
-        <PdfViewer data={pdfBlob} />
+        <div>
+          <Tabs
+            list={[
+              { value: 'html', text: 'HTML' },
+              { value: 'css', text: 'CSS' },
+              { value: 'markdown', text: 'Markdown' },
+            ]}
+            onChangeTab={handleChangeLanguage}
+            activeValue={language}
+          />
+          <CodeTextarea
+            className={css`
+              width: 500px;
+              height: 500px;
+            `}
+            language={language}
+            value={editCodeValue}
+            onChangeValue={handleChangeCode}
+            onBlur={console.log}
+          />
+        </div>
+        <div>
+          <Tabs
+            list={[
+              { value: 'iframe', text: 'Preview Html' },
+              { value: 'pdf', text: 'PDF preview' },
+            ]}
+            onChangeTab={setPreviewMode as any}
+            activeValue={previewMode}
+          />
+          {previewMode === 'iframe' && (
+            <iframe
+              /* TODO: Web font not updated. */
+              title="Preview HTML"
+              src={iframeUrl}
+              width="100%"
+              height="400px"
+            />
+          )}
+          {previewMode === 'pdf' && <PdfViewer data={pdfBlob} />}
+        </div>
+        {Object.entries(fontMap).map(([weight, url], i) => (
+          <div key={weight}>
+            <select
+              defaultValue={weight}
+              onBlur={handleBlurFontWeight(weight as FontWeight)}
+            >
+              {[weight, ...weightList].map((w) => (
+                <option key={w} value={w}>
+                  {w}
+                </option>
+              ))}
+            </select>
+            <input
+              type="text"
+              defaultValue={url}
+              onBlur={handleBlurFontUrl(weight as FontWeight)}
+            />
+          </div>
+        ))}
       </div>
     </>
   )

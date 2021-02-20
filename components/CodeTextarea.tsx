@@ -1,21 +1,19 @@
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api'
-import React, { FC, useRef, useEffect } from 'react'
+import React, { FC, useRef, useEffect, HTMLAttributes } from 'react'
 
 const WORKER_BASE_PATH = '_next/static/'
 export type Language = 'html' | 'css' | 'markdown'
-interface Props {
+interface Props extends HTMLAttributes<HTMLDivElement> {
   value: string
   language: Language
-  onChange: (val: string) => void
-  onBlur: (ev?: any) => void
-  size?: [number, number]
+  onChangeValue: (val: string) => void
 }
 export const CodeTextarea: FC<Props> = ({
   value,
   language,
-  onChange,
+  onChangeValue,
   onBlur,
-  size: [width, height] = [500, 300],
+  ...rest
 }) => {
   const divEl = useRef<HTMLDivElement>(null)
   const editor = useRef<monaco.editor.IStandaloneCodeEditor>()
@@ -52,7 +50,7 @@ export const CodeTextarea: FC<Props> = ({
     editor.current.onDidChangeModelContent(
       (ev: monaco.editor.IModelContentChangedEvent) => {
         if (!editor.current) return
-        onChange(editor.current.getValue())
+        onChangeValue(editor.current.getValue())
       }
     )
     editor.current.onDidBlurEditorText(onBlur)
@@ -63,16 +61,7 @@ export const CodeTextarea: FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language])
 
-  return (
-    <div
-      ref={divEl}
-      className="Editor"
-      style={{
-        width,
-        height,
-      }}
-    />
-  )
+  return <div ref={divEl} {...rest} />
 }
 
 export default CodeTextarea

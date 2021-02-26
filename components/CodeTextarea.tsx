@@ -7,12 +7,13 @@ interface Props extends HTMLAttributes<HTMLDivElement> {
   value: string
   language: Language
   onChangeValue: (val: string) => void
+  onBlurEditor?: () => void
 }
 export const CodeTextarea: FC<Props> = ({
   value,
   language,
   onChangeValue,
-  onBlur,
+  onBlurEditor,
   ...rest
 }) => {
   const divEl = useRef<HTMLDivElement>(null)
@@ -53,7 +54,7 @@ export const CodeTextarea: FC<Props> = ({
         onChangeValue(editor.current.getValue())
       }
     )
-    editor.current.onDidBlurEditorText(onBlur)
+    if (onBlurEditor) editor.current.onDidBlurEditorText(onBlurEditor)
     return () => {
       if (!editor.current) return
       editor.current.dispose()

@@ -11,6 +11,7 @@ import {
   InputHTMLAttributes,
   FocusEventHandler,
   FocusEvent,
+  ChangeEvent,
 } from 'react'
 import type { Language } from '../components/CodeTextarea'
 import { Tabs } from '../components/Tabs'
@@ -50,9 +51,9 @@ const fontFamilyName = 'moji'
 export const Home = (): JSX.Element => {
   const [md, setMd] = useState(markdown.markdown)
   const [html, setHtml] = useState(rirekisho.html)
-  const [cssString, setCss] = useState(markdown.css)
-  const [language, setLanguage] = useState<Language>('markdown')
-  const [previewMode, setPreviewMode] = useState('iframe')
+  const [cssString, setCss] = useState(rirekisho.css)
+  const [language, setLanguage] = useState<Language>('html')
+  const [previewMode, setPreviewMode] = useState('pdf')
   const [h2cOpts, setH2cOpts] = useState<{ [key in H2cOptKey]: number }>({
     scale: 0.7,
     scrollX: 70,
@@ -97,6 +98,7 @@ export const Home = (): JSX.Element => {
   const [iframeUrl, updateIframe] = usePreviewIframe(displayHtml)
   const [format, setFormat] = useState('a3')
   const [orientation, setOrientation] = useState<'l' | 'p'>('l')
+
   const doc = useRef(new jsPDF())
   const editCodeValue = useMemo(() => {
     if (language === 'html') return html
@@ -124,7 +126,7 @@ export const Home = (): JSX.Element => {
     })
 
     setPdfBlob(doc.current.output())
-  }, [h2cOpts, fontFaces, displayHtml])
+  }, [format, orientation, h2cOpts, fontFaces, displayHtml])
   const handleChangeLanguage = useCallback((lang) => setLanguage(lang), [
     setLanguage,
   ])
@@ -135,10 +137,20 @@ export const Home = (): JSX.Element => {
   //   },
   //   [setFontFaces]
   // )
-  const updatePreview = useCallback(() => {
-    updatePdf()
-    updateIframe(displayHtml)
-  }, [updatePdf, updateIframe, displayHtml])
+  const updatePreview = useCallback(
+    (selectedUpdate?: string) => {
+      const pm = selectedUpdate ?? previewMode
+      if (pm === 'pdf') {
+        updatePdf()
+        return
+      }
+      if (pm === 'iframe') {
+        updateIframe(displayHtml)
+        return
+      }
+    },
+    [updatePdf, updateIframe, displayHtml, previewMode]
+  )
   const handleChangeH2cOpts = useCallback(
     (ev: React.ChangeEvent<HTMLInputElement>) => {
       if (!editH2cOptKeys.includes(ev.target.name as any)) return
@@ -190,6 +202,13 @@ export const Home = (): JSX.Element => {
     [language]
   )
 
+  const handleChangePreviewMode = useCallback(
+    (mode: string) => {
+      setPreviewMode(mode)
+      updatePreview(mode)
+    },
+    [updatePreview, setPreviewMode]
+  )
   const handleBlurFormat = useCallback(
     (ev: FocusEvent<HTMLSelectElement>) => {
       setFormat(ev.target.value)
@@ -206,6 +225,7 @@ export const Home = (): JSX.Element => {
     [setOrientation, updatePreview]
   )
 
+  const handleBlurEditor = () => console.log('Blur editor!')
   useEffect(() => {
     if (process.browser) {
       updatePdf()
@@ -215,17 +235,81 @@ export const Home = (): JSX.Element => {
   return (
     <>
       <Head>
-        <title>Create Next App</title>
-        {/* For react-jsonschema-form 
-        <link
-          rel="stylesheet"
-          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-        ></link>
-        */}
+        <title>PDF editor</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
+      <div
+        className={css`
+          display: flex;
+        `}
+      >
+        <div
+          className={css`
+            width: 50%;
+          `}
+        >
+          <Tabs
+            list={[
+              { value: 'html', text: 'HTML' },
+              { value: 'css', text: 'CSS' },
+              { value: 'markdown', text: 'Markdown' },
+            ]}
+            onChangeTab={handleChangeLanguage}
+            activeValue={language}
+          />
+          <CodeTextarea
+            className={css`
+              width: 100%;
+              height: 500px;
+            `}
+            language={language}
+            value={editCodeValue}
+            onChangeValue={handleChangeCode}
+            onBlurEditor={handleBlurEditor}
+          />
+        </div>
+        <div
+          className={css`
+            width: 50%;
+          `}
+        >
+          <Tabs
+            list={[
+              { value: 'iframe', text: 'Preview Html' },
+              { value: 'pdf', text: 'PDF preview' },
+            ]}
+            onChangeTab={handleChangePreviewMode}
+            activeValue={previewMode}
+          />
+          {previewMode === 'iframe' && (
+            <iframe
+              /* TODO: Web font not updated. */
+              title="Preview HTML"
+              src={iframeUrl}
+              width="100%"
+              height="500px"
+            />
+          )}
+          {previewMode === 'pdf' && (
+            <PdfViewer
+              className={css`
+                width: 100%;
+                height: 500px;
+                overflow-x: scroll;
+                overflow-y: scroll;
+              `}
+              data={pdfBlob}
+            />
+          )}
+        </div>
+      </div>
       <div className="container">
-        <div style={{ display: 'flex' }}>
+        <div
+          className={css`
+            display: 'flex';
+          `}
+        >
           <select defaultValue={orientation} onBlur={handleBlurOrientation}>
             <option value="l">landscape(横)</option>
             <option value="p">portrait(縦)</option>
@@ -253,47 +337,6 @@ export const Home = (): JSX.Element => {
           <button onClick={() => doc.current.save(Date.now() + '.pdf')}>
             Download pdf
           </button>
-        </div>
-        <div>
-          <Tabs
-            list={[
-              { value: 'html', text: 'HTML' },
-              { value: 'css', text: 'CSS' },
-              { value: 'markdown', text: 'Markdown' },
-            ]}
-            onChangeTab={handleChangeLanguage}
-            activeValue={language}
-          />
-          <CodeTextarea
-            className={css`
-              width: 500px;
-              height: 500px;
-            `}
-            language={language}
-            value={editCodeValue}
-            onChangeValue={handleChangeCode}
-            onBlur={console.log}
-          />
-        </div>
-        <div>
-          <Tabs
-            list={[
-              { value: 'iframe', text: 'Preview Html' },
-              { value: 'pdf', text: 'PDF preview' },
-            ]}
-            onChangeTab={setPreviewMode as any}
-            activeValue={previewMode}
-          />
-          {previewMode === 'iframe' && (
-            <iframe
-              /* TODO: Web font not updated. */
-              title="Preview HTML"
-              src={iframeUrl}
-              width="100%"
-              height="400px"
-            />
-          )}
-          {previewMode === 'pdf' && <PdfViewer data={pdfBlob} />}
         </div>
         {Object.entries(fontMap).map(([weight, url], i) => (
           <div key={weight}>

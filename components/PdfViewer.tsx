@@ -114,8 +114,7 @@ export const PdfRenderArea = forwardRef<HTMLDivElement>((props, ref) => (
 ))
 
 export const PdfViewer: FC<Props> = (props) => {
-  const [viewerRef, { isLoading, load }] = usePdfViewer(props)
-  useEffect(load, [load])
+  const [viewerRef, { isLoading }] = usePdfViewer(props)
   return (
     <>
       {isLoading && <div>Loading...</div>}

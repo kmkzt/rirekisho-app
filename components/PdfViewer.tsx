@@ -2,6 +2,7 @@ import * as pdfjsLib from 'pdfjs-dist'
 import {
   FC,
   forwardRef,
+  HTMLAttributes,
   RefObject,
   useCallback,
   useEffect,
@@ -107,18 +108,25 @@ export const usePdfViewer = ({
   ]
 }
 
-export const PdfRenderArea = forwardRef<HTMLDivElement>((props, ref) => (
-  <div ref={ref}>
+export const PdfRenderArea = forwardRef<
+  HTMLDivElement,
+  HTMLAttributes<HTMLDivElement>
+>((props, ref) => (
+  <div ref={ref} {...props}>
     <div id="viewer" className="pdfViewer" />
   </div>
 ))
 
-export const PdfViewer: FC<Props> = (props) => {
-  const [viewerRef, { isLoading }] = usePdfViewer(props)
+export const PdfViewer: FC<Props & HTMLAttributes<HTMLDivElement>> = ({
+  data,
+  ...rest
+}) => {
+  const [viewerRef, { isLoading, load }] = usePdfViewer({ data })
   return (
     <>
       {isLoading && <div>Loading...</div>}
-      <PdfRenderArea ref={viewerRef} />
+      <PdfRenderArea ref={viewerRef} {...rest} />
+      <button onClick={load}>reload</button>
     </>
   )
 }
